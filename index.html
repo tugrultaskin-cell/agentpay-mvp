@@ -27,16 +27,46 @@
     </div>
 
     <script>
+        <!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentPay - Gerçek Solana USDC Ödeme</title>
+    <!-- Solana Web3.js Kütüphanesi -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 380px; text-align: center; }
+        button { background: #9333ea; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; }
+        button:hover { background: #7e22ce; }
+        input { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        #status { margin-top: 15px; font-size: 14px; color: #38bdf8; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>AgentPay Checkout</h2>
+        <p>Solana Devnet / Mainnet USDC Ödemesi</p>
+        
+        <input type="number" id="amount" placeholder="Tutar (USDC)" value="1">
+        <button id="connectBtn" onclick="connectWallet()">Phantom Cüzdanı Bağla</button>
+        <button id="payBtn" onclick="sendUSDC()" style="display:none; background: #22c55e;">USDC Öde</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
         let userWallet = null;
 
         async function connectWallet() {
             const provider = window.phantom?.solana;
-
             if (provider?.isPhantom) {
                 try {
                     const response = await provider.connect();
-                    userWallet = response.publicKey.toString();
-                    document.getElementById("status").innerText = "Bağlandı: " + userWallet.slice(0, 4) + "..." + userWallet.slice(-4);
+                    userWallet = response.publicKey;
+                    document.getElementById("status").innerText = "Bağlandı: " + userWallet.toString().slice(0, 4) + "..." + userWallet.toString().slice(-4);
                     document.getElementById("connectBtn").style.display = "none";
                     document.getElementById("payBtn").style.display = "block";
                 } catch (err) {
@@ -44,46 +74,67 @@
                     document.getElementById("status").innerText = "Cüzdan bağlantısı reddedildi.";
                 }
             } else {
-                alert("Phantom cüzdanı bulunamadı! Lütfen tarayıcınıza Phantom yükleyin.");
+                alert("Phantom cüzdanı bulunamadı!");
                 window.open("https://phantom.app/", "_blank");
             }
         }
 
-        async function payWithUSDC() {
+        async function sendUSDC() {
             const amount = document.getElementById("amount").value;
-            const recipient = "GÖNDERİLECEK_ŞİRKET_CÜZDAN_ADRESİ"; // Kendi şirket cüzdan adresini buraya yazabilirsin
-
             if (!userWallet) {
                 alert("Önce cüzdanınızı bağlayın!");
                 return;
             }
 
-            document.getElementById("status").innerText = "Ödeme API'ye iletiliyor...";
+            document.getElementById("status").innerText = "Cüzdan işlem için hazırlanıyor...";
 
             try {
-                // Railway'deki canlı API'mize istek atıyoruz
-                const res = await fetch("https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc", {
+                // Solana bağlantısı (Testnet/Devnet veya Mainnet için rpc endpoint)
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
+                
+                // Alıcı cüzdan adresi (Kendi şirket cüzdanını buraya yazabilirsin)
+                const recipientPubKey = new solanaWeb3.PublicKey("F66HsNWKPLvEek2V8BSa8bpsLjaxruARMMnaBamYePah");
+
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: userWallet,
+                        toPubkey: recipientPubKey,
+                        lamports: amount * solanaWeb3.LAMPORTS_PER_SOL // Test amaçlı SOL veya SPL token talimatı
+                    })
+                );
+
+                // Son blockhash alınıyor
+                const { blockhash } = await connection.getLatestBlockhash();
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = userWallet;
+
+                // Kullanıcının Phantom cüzdanı ile işlemi imzalaması isteniyor
+                const signed = await window.phantom.solana.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signed.serialize());
+                
+                document.getElementById("status").innerText = "İşlem Gönderildi! Hash: " + signature.slice(0, 10) + "...";
+                
+                // Backend'e (FastAPI) işlemin başarılı olduğunu bildiriyoruz
+                await fetch("https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        sender_wallet: userWallet,
+                        sender_wallet: userWallet.toString(),
                         amount: parseFloat(amount),
-                        recipient_wallet: recipient
+                        tx_signature: signature
                     })
                 });
 
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById("status").innerText = "Başarılı! İşlem ID oluşturuldu.";
-                    alert("Ödeme talebi alındı! Tutar: " + data.amount + " USDC");
-                } else {
-                    document.getElementById("status").innerText = "Hata: " + data.detail;
-                }
+                alert("Ödeme başarıyla tamamlandı ve blokzincire kaydedildi!");
+
             } catch (error) {
                 console.error(error);
-                document.getElementById("status").innerText = "Sunucu bağlantı hatası.";
+                document.getElementById("status").innerText = "Hata: " + (error.message || error);
             }
         }
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
