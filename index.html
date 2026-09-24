@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentPay - Solana USDC Ödeme</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 350px; text-align: center; }
+        button { background: #9333ea; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; }
+        button:hover { background: #7e22ce; }
+        input { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        #status { margin-top: 15px; font-size: 14px; color: #38bdf8; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>AgentPay Checkout</h2>
+        <p>Solana (USDC) ile Güvenli Ödeme</p>
+        
+        <input type="number" id="amount" placeholder="Tutar (USDC)" value="10">
+        <button id="connectBtn" onclick="connectWallet()">Phantom Cüzdanı Bağla</button>
+        <button id="payBtn" onclick="payWithUSDC()" style="display:none; background: #22c55e;">USDC Gönder</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        let userWallet = null;
+
+        async function connectWallet() {
+            const provider = window.phantom?.solana;
+
+            if (provider?.isPhantom) {
+                try {
+                    const response = await provider.connect();
+                    userWallet = response.publicKey.toString();
+                    document.getElementById("status").innerText = "Bağlandı: " + userWallet.slice(0, 4) + "..." + userWallet.slice(-4);
+                    document.getElementById("connectBtn").style.display = "none";
+                    document.getElementById("payBtn").style.display = "block";
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById("status").innerText = "Cüzdan bağlantısı reddedildi.";
+                }
+            } else {
+                alert("Phantom cüzdanı bulunamadı! Lütfen tarayıcınıza Phantom yükleyin.");
+                window.open("https://phantom.app/", "_blank");
+            }
+        }
+
+        async function payWithUSDC() {
+            const amount = document.getElementById("amount").value;
+            const recipient = "GÖNDERİLECEK_ŞİRKET_CÜZDAN_ADRESİ"; // Kendi şirket cüzdan adresini buraya yazabilirsin
+
+            if (!userWallet) {
+                alert("Önce cüzdanınızı bağlayın!");
+                return;
+            }
+
+            document.getElementById("status").innerText = "Ödeme API'ye iletiliyor...";
+
+            try {
+                // Railway'deki canlı API'mize istek atıyoruz
+                const res = await fetch("https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sender_wallet: userWallet,
+                        amount: parseFloat(amount),
+                        recipient_wallet: recipient
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById("status").innerText = "Başarılı! İşlem ID oluşturuldu.";
+                    alert("Ödeme talebi alındı! Tutar: " + data.amount + " USDC");
+                } else {
+                    document.getElementById("status").innerText = "Hata: " + data.detail;
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById("status").innerText = "Sunucu bağlantı hatası.";
+            }
+        }
+    </script>
+</body>
+</html>
