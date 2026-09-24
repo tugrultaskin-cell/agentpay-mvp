@@ -3,59 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay - Solana USDC Ödeme</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 350px; text-align: center; }
-        button { background: #9333ea; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; }
-        button:hover { background: #7e22ce; }
-        input { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        #status { margin-top: 15px; font-size: 14px; color: #38bdf8; }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <h2>AgentPay Checkout</h2>
-        <p>Solana (USDC) ile Güvenli Ödeme</p>
-        
-        <input type="number" id="amount" placeholder="Tutar (USDC)" value="10">
-        <button id="connectBtn" onclick="connectWallet()">Phantom Cüzdanı Bağla</button>
-        <button id="payBtn" onclick="payWithUSDC()" style="display:none; background: #22c55e;">USDC Gönder</button>
-        
-        <div id="status"></div>
-    </div>
-
-    <script>
-        <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay - Gerçek Solana USDC Ödeme</title>
-    <!-- Solana Web3.js Kütüphanesi -->
+    <title>AgentPay - Solana Tabanlı Web3 Ödeme Altyapısı</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 380px; text-align: center; }
-        button { background: #9333ea; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; }
-        button:hover { background: #7e22ce; }
-        input { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        #status { margin-top: 15px; font-size: 14px; color: #38bdf8; word-break: break-all; }
+        :root { --bg: #0f172a; --card-bg: #1e293b; --primary: #9333ea; --primary-hover: #7e22ce; --text: #f8fafc; --muted: #94a3b8; --accent: #22c55e; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; border-bottom: 1px solid #334155; }
+        .logo { font-size: 24px; font-weight: bold; color: #c084fc; }
+        .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 60px 20px; flex: 1; }
+        h1 { font-size: 42px; margin-bottom: 10px; background: linear-gradient(to right, #c084fc, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { color: var(--muted); font-size: 18px; max-width: 600px; margin-bottom: 40px; }
+        .checkout-card { background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 400px; text-align: left; border: 1px solid #334155; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--primary); color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--accent); }
+        .btn-success:hover { background: #16a34a; }
+        #status { margin-top: 15px; font-size: 14px; color: #38bdf8; text-align: center; word-break: break-all; }
+        footer { text-align: center; padding: 20px; color: var(--muted); border-top: 1px solid #334155; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>AgentPay Checkout</h2>
-        <p>Solana Devnet / Mainnet USDC Ödemesi</p>
-        
-        <input type="number" id="amount" placeholder="Tutar (USDC)" value="1">
-        <button id="connectBtn" onclick="connectWallet()">Phantom Cüzdanı Bağla</button>
-        <button id="payBtn" onclick="sendUSDC()" style="display:none; background: #22c55e;">USDC Öde</button>
-        
-        <div id="status"></div>
+    <header>
+        <div class="logo">⚡ AgentPay</div>
+        <div><a href="https://github.com" target="_blank" style="color: var(--muted); text-decoration: none;">GitHub Dokümantasyon</a></div>
+    </header>
+
+    <div class="hero">
+        <h1>Yapay Zeka ve Web3 İçin Anında Ödeme</h1>
+        <p class="subtitle">Solana ağının hızı ve sıfıra yakın komisyon oranlarıyla USDC tabanlı güvenli ödeme altyapısını projelerinize entegre edin.</p>
+
+        <div class="checkout-card">
+            <h3>Hızlı Test & Ödeme Paneli</h3>
+            <div class="form-group">
+                <label>Ödenecek Tutar (USDC)</label>
+                <input type="number" id="amount" value="1">
+            </div>
+            
+            <button id="connectBtn" onclick="connectWallet()">Phantom Cüzdanı Bağla</button>
+            <button id="payBtn" class="btn-success" onclick="sendUSDC()" style="display:none;">USDC ile Ödeme Yap</button>
+            
+            <div id="status"></div>
+        </div>
     </div>
+
+    <footer>
+        &copy; 2026 AgentPay MVP. Tüm hakları saklıdır. Solana Mainnet/Devnet Destekli.
+    </footer>
 
     <script>
         let userWallet = null;
@@ -86,35 +83,29 @@
                 return;
             }
 
-            document.getElementById("status").innerText = "Cüzdan işlem için hazırlanıyor...";
+            document.getElementById("status").innerText = "İşlem hazırlanıyor...";
 
             try {
-                // Solana bağlantısı (Testnet/Devnet veya Mainnet için rpc endpoint)
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
-                
-                // Alıcı cüzdan adresi (Kendi şirket cüzdanını buraya yazabilirsin)
                 const recipientPubKey = new solanaWeb3.PublicKey("F66HsNWKPLvEek2V8BSa8bpsLjaxruARMMnaBamYePah");
 
                 const transaction = new solanaWeb3.Transaction().add(
                     solanaWeb3.SystemProgram.transfer({
                         fromPubkey: userWallet,
                         toPubkey: recipientPubKey,
-                        lamports: amount * solanaWeb3.LAMPORTS_PER_SOL // Test amaçlı SOL veya SPL token talimatı
+                        lamports: amount * solanaWeb3.LAMPORTS_PER_SOL
                     })
                 );
 
-                // Son blockhash alınıyor
                 const { blockhash } = await connection.getLatestBlockhash();
                 transaction.recentBlockhash = blockhash;
                 transaction.feePayer = userWallet;
 
-                // Kullanıcının Phantom cüzdanı ile işlemi imzalaması isteniyor
                 const signed = await window.phantom.solana.signTransaction(transaction);
                 const signature = await connection.sendRawTransaction(signed.serialize());
                 
                 document.getElementById("status").innerText = "İşlem Gönderildi! Hash: " + signature.slice(0, 10) + "...";
                 
-                // Backend'e (FastAPI) işlemin başarılı olduğunu bildiriyoruz
                 await fetch("https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -125,16 +116,13 @@
                     })
                 });
 
-                alert("Ödeme başarıyla tamamlandı ve blokzincire kaydedildi!");
+                alert("Ödeme başarıyla tamamlandı!");
 
             } catch (error) {
                 console.error(error);
                 document.getElementById("status").innerText = "Hata: " + (error.message || error);
             }
         }
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
