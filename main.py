@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -8,11 +8,15 @@ import os
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay MVP", version="1.1.0")
+app = FastAPI(title="AgentPay MVP", version="1.2.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+# BURAYA KENDI YÖNETİCİ BİLGİLERİNİ YAZABİLİRSİN
+ADMIN_USERNAME = "Tugrul35"
+ADMIN_PASSWORD = "123580Tt."
 
 PAYMENT_DATABASE = []
 
@@ -22,6 +26,10 @@ class PaymentRequest(BaseModel):
     tx_signature: str
     plan_name: str = "Özel Ödeme"
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     if os.path.exists("index.html"):
@@ -29,12 +37,18 @@ def read_root():
             return f.read()
     return {"status": "online", "service": "AgentPay MVP API", "network": "Solana"}
 
+@app.post("/api/admin/login")
+def admin_login(data: LoginRequest):
+    if data.username == ADMIN_USERNAME and data.password == ADMIN_PASSWORD:
+        return {"success": True, "token": "agentpay_secure_admin_token_2026"}
+    raise HTTPException(status_code=401, detail="Geçersiz kullanıcı adı veya şifre.")
+
 @app.post("/api/pay-usdc")
 @limiter.limit("5/minute")
 def create_usdc_payment(request: Request, data: PaymentRequest):
     try:
         if data.amount <= 0:
-            raise HTTPException(status_code=400, detail="Geçersiz tutar.")
+            raise HTTPException(status_code=400, detail="Invalid amount.")
             
         payment_record = {
             "sender_wallet": data.sender_wallet,
@@ -47,7 +61,7 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
 
         return {
             "success": True,
-            "message": "Ödeme işlemi blokzincir imzasıyla doğrulandı ve kaydedildi.",
+            "message": "Payment verified and recorded.",
             "token": "USDC",
             "amount": data.amount,
             "tx_signature": data.tx_signature
@@ -56,5 +70,7 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/payments")
-def get_payments():
+def get_payments(authorization: str = Header(None)):
+    if not authorization or authorization != "agentpay_secure_admin_token_2026":
+        raise HTTPException(status_code=403, detail="Unauthorized access.")
     return {"success": True, "payments": PAYMENT_DATABASE[::-1]}
