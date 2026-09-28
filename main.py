@@ -11,13 +11,13 @@ from datetime import datetime
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.2.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.3.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Supabase Bağlantısı (Railway Environment Variables üzerinden güvenli okuma)
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://bcpbkrtncavxabyrlecl.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4")
+# Doğrudan koda sabitlenmiş kesin çalışan Supabase JWT Anahtarı
+SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
