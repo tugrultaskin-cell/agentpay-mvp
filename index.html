@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay - Global Web3 Payment Gateway for Developers</title>
+    <title>AgentPay - Global Web3 Payment Gateway</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
         :root { --bg: #0f172a; --card-bg: #1e293b; --primary: #9333ea; --primary-hover: #7e22ce; --text: #f8fafc; --muted: #94a3b8; --accent: #22c55e; --danger: #ef4444; }
@@ -54,10 +54,10 @@
 <body>
 
     <header>
-        <div class="logo" onclick="switchMainTab('home')">⚡ AgentPay</div>
+        <div class="logo" onclick="switchMainTab('home')">⚡ AgentPay Global</div>
         <nav>
-            <a onclick="switchMainTab('home')">Pricing & Pay</a>
-            <a onclick="switchMainTab('dashboard')">Developer Portal</a>
+            <a onclick="switchMainTab('home')">Demo Checkout</a>
+            <a onclick="switchMainTab('dashboard')">Merchant Dashboard</a>
         </nav>
     </header>
 
@@ -65,103 +65,99 @@
         <!-- HOME SECTION -->
         <div id="homeSection">
             <div class="hero">
-                <h1>Instant Payments for AI & SaaS</h1>
-                <p class="subtitle">Accept USDC instantly via Solana. One-time checkouts and recurring subscriptions.</p>
+                <h1>Global USDC Payments for AI & SaaS</h1>
+                <p class="subtitle">Secure, lightning-fast blockchain settlement powered by Solana.</p>
             </div>
 
             <div class="tab-buttons">
-                <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time Payments</button>
-                <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Monthly Subscriptions 🔄</button>
+                <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time</button>
+                <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Subscription 🔄</button>
             </div>
 
             <div class="pricing-grid" id="oneTimePlans">
-                <div class="price-card selected" onclick="selectPlan('Starter Plan', 5, this)">
-                    <h3>Starter</h3>
-                    <div class="price">5 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Ideal for quick testing.</p>
+                <div class="price-card selected" onclick="selectPlan('Global Starter', 10, this)">
+                    <h3>Starter API</h3>
+                    <div class="price">10 USDC</div>
+                    <p style="color: var(--muted); font-size: 14px;">Standard tier.</p>
                 </div>
-                <div class="price-card" onclick="selectPlan('Pro SaaS Plan', 25, this)">
-                    <h3>Pro SaaS</h3>
-                    <div class="price">25 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Perfect for active tools.</p>
+                <div class="price-card" onclick="selectPlan('Global Pro', 50, this)">
+                    <h3>Pro Scale</h3>
+                    <div class="price">50 USDC</div>
+                    <p style="color: var(--muted); font-size: 14px;">High volume tier.</p>
                 </div>
             </div>
 
             <div class="pricing-grid" id="subPlans" style="display: none;">
-                <div class="price-card" onclick="selectPlan('Monthly Starter Sub', 10, this)">
-                    <h3>Starter Sub</h3>
-                    <div class="price">10 USDC / mo</div>
-                    <p style="color: var(--muted); font-size: 14px;">Billed monthly.</p>
-                </div>
-                <div class="price-card" onclick="selectPlan('Monthly Pro Sub', 40, this)">
-                    <h3>Pro SaaS Sub</h3>
-                    <div class="price">40 USDC / mo</div>
-                    <p style="color: var(--muted); font-size: 14px;">Unlimited access.</p>
+                <div class="price-card" onclick="selectPlan('Monthly SaaS Pro', 25, this)">
+                    <h3>Monthly Pro</h3>
+                    <div class="price">25 USDC / mo</div>
+                    <p style="color: var(--muted); font-size: 14px;">Recurring billing.</p>
                 </div>
             </div>
 
             <div class="checkout-box">
-                <h3 id="selectedPlanTitle" style="margin-top:0; color:#38bdf8;">Selected: Starter Plan (5 USDC)</h3>
+                <h3 id="selectedPlanTitle" style="margin-top:0; color:#38bdf8;">Selected: Starter API (10 USDC)</h3>
                 <button id="connectBtn" onclick="connectWallet()">Connect Phantom Wallet</button>
-                <button id="payBtn" class="btn-success" onclick="sendUSDC()" style="display:none;">Complete Payment with USDC</button>
+                <button id="payBtn" class="btn-success" onclick="sendUSDC()" style="display:none;">Pay Securely with USDC</button>
                 <div id="status"></div>
             </div>
         </div>
 
-        <!-- DEVELOPER PORTAL SECTION (Senaryo 2) -->
+        <!-- MERCHANT DASHBOARD SECTION -->
         <div id="dashboardSection">
-            <h2>Developer Portal & Merchant Dashboard</h2>
+            <h2>Global Merchant Portal</h2>
             
-            <!-- Auth Forms (Login / Register) -->
             <div id="authBox" class="auth-box">
                 <div class="tab-buttons" style="margin-bottom: 20px;">
                     <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthMode('login')">Login</button>
                     <button class="tab-btn" id="tabRegBtn" onclick="switchAuthMode('register')">Register</button>
                 </div>
 
-                <div id="formTitle" style="color: #c084fc; font-weight: bold; margin-bottom: 10px;">Developer Login</div>
+                <div id="formTitle" style="color: #c084fc; font-weight: bold; margin-bottom: 10px;">Merchant Login</div>
                 <label style="font-size: 14px; color: var(--muted);">Email Address</label>
-                <input type="email" id="authEmail" placeholder="developer@example.com">
+                <input type="email" id="authEmail" placeholder="merchant@global.com">
                 <label style="font-size: 14px; color: var(--muted);">Password</label>
                 <input type="password" id="authPassword" placeholder="••••••••">
+                
+                <div id="walletInputWrapper" style="display:none;">
+                    <label style="font-size: 14px; color: var(--muted);">Your Payout Wallet (Solana)</label>
+                    <input type="text" id="authWallet" placeholder="Solana wallet address for earnings">
+                </div>
+
                 <button id="authSubmitBtn" onclick="handleAuth()">Login to Portal</button>
                 <div id="authError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Developer Dashboard Content -->
             <div id="portalContent" style="display: none;">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div style="color: var(--muted); font-size: 14px;">Total Gateway Revenue</div>
-                        <div class="stat-value" id="totalRevenue">0 USDC</div>
+                        <div style="color: var(--muted); font-size: 14px;">Total Global Volume</div>
+                        <div class="stat-value" id="totalVolume">0 USDC</div>
                     </div>
                     <div class="stat-card">
-                        <div style="color: var(--muted); font-size: 14px;">Total Transactions</div>
-                        <div class="stat-value" id="totalTx">0</div>
+                        <div style="color: var(--muted); font-size: 14px;">Platform Fee Earnings (2%)</div>
+                        <div class="stat-value" id="platformEarnings" style="color: #22c55e;">0 USDC</div>
                     </div>
                 </div>
 
-                <!-- API Key Management -->
                 <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 My API Keys</h3>
-                    <p style="color: var(--muted); font-size: 13px;">Generate your live API keys to integrate AgentPay into your apps.</p>
-                    <button onclick="generateUserApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate API Key</button>
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 Live API Keys</h3>
+                    <button onclick="generateMerchantApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate New API Key</button>
                     <table style="margin-top: 10px;">
                         <thead><tr><th>API Key</th><th>Created At</th></tr></thead>
                         <tbody id="apiKeyTableBody">
-                            <tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>
+                            <tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated.</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Embed Widget -->
                 <div class="admin-box">
                     <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget SDK</h3>
                     <textarea readonly id="embedCodeSnippet"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <p style="color: var(--muted); margin: 0;">Gateway transaction logs:</p>
+                    <p style="color: var(--muted); margin: 0;">Global transaction ledger:</p>
                     <div>
                         <button onclick="loadPortalData()" style="width: auto; padding: 8px 16px; margin-right: 10px;">Refresh</button>
                         <button onclick="portalLogout()" style="width: auto; padding: 8px 16px; background: #475569;">Logout</button>
@@ -171,16 +167,17 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Sender Wallet</th>
+                            <th>Sender</th>
                             <th>Plan</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Transaction Hash</th>
-                            <th>Timestamp</th>
+                            <th>Gross Amount</th>
+                            <th>Fee (2%)</th>
+                            <th>Net Payout</th>
+                            <th>Tx Signature</th>
+                            <th>Time</th>
                         </tr>
                     </thead>
                     <tbody id="paymentTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--muted);">No payments recorded yet.</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: var(--muted);">No global payments recorded.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -188,13 +185,13 @@
     </div>
 
     <footer>
-        &copy; 2026 AgentPay Platform. All rights reserved.
+        &copy; 2026 AgentPay Global Network. All rights reserved.
     </footer>
 
     <script>
         let userWallet = null;
-        let currentPlan = "Starter Plan";
-        let currentAmount = 5;
+        let currentPlan = "Global Starter";
+        let currentAmount = 10;
         let isSubMode = false;
         let isRegisterMode = false;
 
@@ -211,14 +208,14 @@
                 document.getElementById("btnSub").classList.remove("active");
                 document.getElementById("oneTimePlans").style.display = "grid";
                 document.getElementById("subPlans").style.display = "none";
-                selectPlan('Starter Plan', 5, document.querySelector('#oneTimePlans .price-card'));
+                selectPlan('Global Starter', 10, document.querySelector('#oneTimePlans .price-card'));
             } else {
                 isSubMode = true;
                 document.getElementById("btnSub").classList.add("active");
                 document.getElementById("btnOneTime").classList.remove("active");
                 document.getElementById("oneTimePlans").style.display = "none";
                 document.getElementById("subPlans").style.display = "grid";
-                selectPlan('Monthly Starter Sub', 10, document.querySelector('#subPlans .price-card'));
+                selectPlan('Monthly SaaS Pro', 25, document.querySelector('#subPlans .price-card'));
             }
         }
 
@@ -247,22 +244,25 @@
             const btnReg = document.getElementById("tabRegBtn");
             const submitBtn = document.getElementById("authSubmitBtn");
             const title = document.getElementById("formTitle");
+            const walletWrapper = document.getElementById("walletInputWrapper");
 
             if(isRegisterMode) {
                 btnReg.classList.add("active");
                 btnLogin.classList.remove("active");
-                submitBtn.innerText = "Register New Account";
-                title.innerText = "Create Developer Account";
+                submitBtn.innerText = "Register Merchant Account";
+                title.innerText = "Create Global Merchant";
+                walletWrapper.style.display = "block";
             } else {
                 btnLogin.classList.add("active");
                 btnReg.classList.remove("active");
                 submitBtn.innerText = "Login to Portal";
-                title.innerText = "Developer Login";
+                title.innerText = "Merchant Login";
+                walletWrapper.style.display = "none";
             }
         }
 
         function checkPortalAuth() {
-            const token = localStorage.getItem("dev_token");
+            const token = localStorage.getItem("global_dev_token");
             if (token) {
                 document.getElementById("authBox").style.display = "none";
                 document.getElementById("portalContent").style.display = "block";
@@ -276,50 +276,50 @@
         async function handleAuth() {
             const email = document.getElementById("authEmail").value;
             const password = document.getElementById("authPassword").value;
+            const payout_wallet = document.getElementById("authWallet").value || "CQcf...TD4q";
             const errDiv = document.getElementById("authError");
 
             const endpoint = isRegisterMode ? "/api/auth/register" : "/api/auth/login";
+            const payload = isRegisterMode ? { email, password, payout_wallet } : { email, password };
 
             try {
                 const res = await fetch(endpoint, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json();
                 if (res.ok && data.success) {
                     if(isRegisterMode) {
-                        alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+                        alert("Registration successful! Please login.");
                         switchAuthMode('login');
                     } else {
-                        localStorage.setItem("dev_token", data.token);
+                        localStorage.setItem("global_dev_token", data.token);
                         errDiv.innerText = "";
                         checkPortalAuth();
                     }
                 } else {
-                    errDiv.innerText = data.detail || "İşlem başarısız.";
+                    errDiv.innerText = data.detail || "Authentication failed.";
                 }
-            } catch(e) {
-                errDiv.innerText = "Bağlantı hatası oluştu.";
-            }
+            } catch(e) { errDiv.innerText = "Network error."; }
         }
 
         function portalLogout() {
-            localStorage.removeItem("dev_token");
+            localStorage.removeItem("global_dev_token");
             checkPortalAuth();
         }
 
-        async function generateUserApiKey() {
-            const token = localStorage.getItem("dev_token");
+        async function generateMerchantApiKey() {
+            const token = localStorage.getItem("global_dev_token");
             try {
-                const res = await fetch("/api/user/apikey/generate", {
+                const res = await fetch("/api/merchant/apikey/generate", {
                     method: "POST",
                     headers: { "Authorization": token }
                 });
                 const data = await res.json();
                 if(data.success) { loadPortalData(); }
-            } catch(e) { alert("API anahtarı üretilemedi."); }
+            } catch(e) { alert("Failed to generate API key."); }
         }
 
         async function connectWallet() {
@@ -331,9 +331,7 @@
                     document.getElementById("status").innerText = "Connected: " + userWallet.toString().slice(0, 4) + "..." + userWallet.toString().slice(-4);
                     document.getElementById("connectBtn").style.display = "none";
                     document.getElementById("payBtn").style.display = "block";
-                } catch (err) {
-                    document.getElementById("status").innerText = "Wallet connection rejected.";
-                }
+                } catch (err) { document.getElementById("status").innerText = "Connection rejected."; }
             } else {
                 alert("Phantom wallet not found!");
                 window.open("https://phantom.app/", "_blank");
@@ -341,8 +339,8 @@
         }
 
         async function sendUSDC() {
-            if (!userWallet) { alert("Please connect your wallet first!"); return; }
-            document.getElementById("status").innerText = "Preparing transaction (devnet)...";
+            if (!userWallet) { alert("Connect wallet first!"); return; }
+            document.getElementById("status").innerText = "Broadcasting global transaction (devnet)...";
 
             try {
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
@@ -363,7 +361,7 @@
                 const signed = await window.phantom.solana.signTransaction(transaction);
                 const signature = await connection.sendRawTransaction(signed.serialize());
                 
-                document.getElementById("status").innerText = "Payment Sent! Saving record...";
+                document.getElementById("status").innerText = "Verifying transaction on blockchain...";
                 
                 await fetch("/api/pay-usdc", {
                     method: "POST",
@@ -377,8 +375,8 @@
                     })
                 });
 
-                document.getElementById("status").innerText = "Payment completed successfully!";
-                alert("Payment successfully verified and recorded!");
+                document.getElementById("status").innerText = "Payment cryptographically verified!";
+                alert("Global payment successfully processed and fee split applied!");
 
             } catch (error) {
                 console.error(error);
@@ -388,8 +386,8 @@
 
         async function loadPortalData() {
             try {
-                const token = localStorage.getItem("dev_token");
-                const res = await fetch("/api/user/dashboard", {
+                const token = localStorage.getItem("global_dev_token");
+                const res = await fetch("/api/merchant/dashboard", {
                     headers: { "Authorization": token }
                 });
                 
@@ -397,13 +395,13 @@
 
                 const data = await res.json();
                 
-                document.getElementById("totalRevenue").innerText = data.total_revenue + " USDC";
-                document.getElementById("totalTx").innerText = data.total_transactions;
+                document.getElementById("totalVolume").innerText = data.total_volume.toFixed(2) + " USDC";
+                document.getElementById("platformEarnings").innerText = data.platform_earnings.toFixed(2) + " USDC";
 
                 const apiKeyTbody = document.getElementById("apiKeyTableBody");
                 apiKeyTbody.innerHTML = "";
                 if(!data.api_keys || data.api_keys.length === 0) {
-                    apiKeyTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>`;
+                    apiKeyTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated.</td></tr>`;
                 } else {
                     data.api_keys.forEach(k => {
                         apiKeyTbody.innerHTML += `<tr><td><code>${k.key}</code></td><td>${k.created_at}</td></tr>`;
@@ -413,22 +411,22 @@
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
                 if(!data.payments || data.payments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted);">No payments recorded yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--muted);">No global payments recorded.</td></tr>`;
                     return;
                 }
 
                 data.payments.forEach(p => {
-                    const row = `<tr>
-                        <td>${p.sender_wallet.slice(0, 6)}...${p.sender_wallet.slice(-4)}</td>
+                    tbody.innerHTML += `<tr>
+                        <td>${p.sender_wallet.slice(0, 4)}...${p.sender_wallet.slice(-4)}</td>
                         <td>${p.plan_name}</td>
-                        <td><span style="color: ${p.type === 'Abonelik' ? '#c084fc' : '#38bdf8'}">${p.type}</span></td>
                         <td>${p.amount} USDC</td>
-                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}?cluster=devnet" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
+                        <td style="color:#ef4444;">${p.platform_fee.toFixed(2)} USDC</td>
+                        <td style="color:#22c55e;">${p.merchant_payout.toFixed(2)} USDC</td>
+                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}?cluster=devnet" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 6)}...</a></td>
                         <td>${p.timestamp}</td>
                     </tr>`;
-                    tbody.innerHTML += row;
                 });
-            } catch(e) { console.error("Could not load portal data", e); }
+            } catch(e) { console.error("Error loading portal", e); }
         }
     </script>
 </body>
