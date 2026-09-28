@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay - Instant Web3 Payment Gateway for AI & SaaS</title>
+    <title>AgentPay - Global Web3 Payment Gateway for Developers</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
         :root { --bg: #0f172a; --card-bg: #1e293b; --primary: #9333ea; --primary-hover: #7e22ce; --text: #f8fafc; --muted: #94a3b8; --accent: #22c55e; --danger: #ef4444; }
@@ -28,7 +28,7 @@
         .price-card h3 { margin-top: 0; color: #c084fc; }
         .price { font-size: 28px; font-weight: bold; margin: 15px 0; }
         
-        .checkout-box, .login-box { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid #334155; max-width: 400px; margin: 0 auto; text-align: left; }
+        .checkout-box, .auth-box { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid #334155; max-width: 400px; margin: 0 auto; text-align: left; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; transition: background 0.2s; }
         button:hover { background: var(--primary-hover); }
@@ -36,7 +36,6 @@
         .btn-success:hover { background: #16a34a; }
         #status { margin-top: 15px; font-size: 14px; color: #38bdf8; text-align: center; word-break: break-all; }
         
-        /* Analytics Grid in Admin */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
@@ -58,7 +57,7 @@
         <div class="logo" onclick="switchMainTab('home')">⚡ AgentPay</div>
         <nav>
             <a onclick="switchMainTab('home')">Pricing & Pay</a>
-            <a onclick="switchMainTab('dashboard')">Admin Dashboard</a>
+            <a onclick="switchMainTab('dashboard')">Developer Portal</a>
         </nav>
     </header>
 
@@ -67,104 +66,86 @@
         <div id="homeSection">
             <div class="hero">
                 <h1>Instant Payments for AI & SaaS</h1>
-                <p class="subtitle">Choose between one-time checkout or monthly recurring subscriptions via Solana using USDC.</p>
+                <p class="subtitle">Accept USDC instantly via Solana. One-time checkouts and recurring subscriptions.</p>
             </div>
 
-            <!-- Tip Seçim Butonları (Tek Seferlik vs Abonelik) -->
             <div class="tab-buttons">
                 <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time Payments</button>
                 <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Monthly Subscriptions 🔄</button>
             </div>
 
-            <!-- Tek Seferlik Paketler -->
             <div class="pricing-grid" id="oneTimePlans">
                 <div class="price-card selected" onclick="selectPlan('Starter Plan', 5, this)">
-                    <h3>Starter (One-Time)</h3>
+                    <h3>Starter</h3>
                     <div class="price">5 USDC</div>
                     <p style="color: var(--muted); font-size: 14px;">Ideal for quick testing.</p>
                 </div>
                 <div class="price-card" onclick="selectPlan('Pro SaaS Plan', 25, this)">
-                    <h3>Pro SaaS (One-Time)</h3>
+                    <h3>Pro SaaS</h3>
                     <div class="price">25 USDC</div>
                     <p style="color: var(--muted); font-size: 14px;">Perfect for active tools.</p>
                 </div>
             </div>
 
-            <!-- Abonelik Paketleri (Başlangıçta gizli) -->
             <div class="pricing-grid" id="subPlans" style="display: none;">
                 <div class="price-card" onclick="selectPlan('Monthly Starter Sub', 10, this)">
                     <h3>Starter Sub</h3>
                     <div class="price">10 USDC / mo</div>
-                    <p style="color: var(--muted); font-size: 14px;">Billed monthly, cancel anytime.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Billed monthly.</p>
                 </div>
                 <div class="price-card" onclick="selectPlan('Monthly Pro Sub', 40, this)">
                     <h3>Pro SaaS Sub</h3>
                     <div class="price">40 USDC / mo</div>
-                    <p style="color: var(--muted); font-size: 14px;">Unlimited AI agent workflow access.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Unlimited access.</p>
                 </div>
             </div>
 
             <div class="checkout-box">
                 <h3 id="selectedPlanTitle" style="margin-top:0; color:#38bdf8;">Selected: Starter Plan (5 USDC)</h3>
-                
                 <button id="connectBtn" onclick="connectWallet()">Connect Phantom Wallet</button>
                 <button id="payBtn" class="btn-success" onclick="sendUSDC()" style="display:none;">Complete Payment with USDC</button>
-                
                 <div id="status"></div>
             </div>
         </div>
 
-        <!-- ADMIN DASHBOARD SECTION -->
+        <!-- DEVELOPER PORTAL SECTION (Senaryo 2) -->
         <div id="dashboardSection">
-            <h2>Payment Management Dashboard</h2>
+            <h2>Developer Portal & Merchant Dashboard</h2>
             
-            <div id="loginBox" class="login-box">
-                <h3 style="margin-top:0; color:#c084fc;">Admin Login</h3>
-                <label style="font-size: 14px; color: var(--muted);">Username</label>
-                <input type="text" id="adminUser" placeholder="Enter username">
+            <!-- Auth Forms (Login / Register) -->
+            <div id="authBox" class="auth-box">
+                <div class="tab-buttons" style="margin-bottom: 20px;">
+                    <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthMode('login')">Login</button>
+                    <button class="tab-btn" id="tabRegBtn" onclick="switchAuthMode('register')">Register</button>
+                </div>
+
+                <div id="formTitle" style="color: #c084fc; font-weight: bold; margin-bottom: 10px;">Developer Login</div>
+                <label style="font-size: 14px; color: var(--muted);">Email Address</label>
+                <input type="email" id="authEmail" placeholder="developer@example.com">
                 <label style="font-size: 14px; color: var(--muted);">Password</label>
-                <input type="password" id="adminPass" placeholder="Enter password">
-                <button onclick="adminLogin()">Login to Dashboard</button>
-                <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
+                <input type="password" id="authPassword" placeholder="••••••••">
+                <button id="authSubmitBtn" onclick="handleAuth()">Login to Portal</button>
+                <div id="authError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <div id="adminContent" style="display: none;">
-                <!-- Analytics Cards -->
+            <!-- Developer Dashboard Content -->
+            <div id="portalContent" style="display: none;">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div style="color: var(--muted); font-size: 14px;">Total Revenue</div>
+                        <div style="color: var(--muted); font-size: 14px;">Total Gateway Revenue</div>
                         <div class="stat-value" id="totalRevenue">0 USDC</div>
                     </div>
                     <div class="stat-card">
                         <div style="color: var(--muted); font-size: 14px;">Total Transactions</div>
                         <div class="stat-value" id="totalTx">0</div>
                     </div>
-                    <div class="stat-card">
-                        <div style="color: var(--muted); font-size: 14px;">Active Subscriptions</div>
-                        <div class="stat-value" id="totalSubs">0</div>
-                    </div>
                 </div>
 
-                <!-- Settings Box -->
+                <!-- API Key Management -->
                 <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">⚙️ Gateway Settings</h3>
-                    <label style="font-size: 13px; color: var(--muted);">Solana Network Mode</label>
-                    <select id="networkSelect">
-                        <option value="devnet">Devnet (Test Mode)</option>
-                        <option value="mainnet-beta">Mainnet (Live / Real USDC)</option>
-                    </select>
-
-                    <label style="font-size: 13px; color: var(--muted); display: block; margin-top: 10px;">Webhook Notification URL</label>
-                    <input type="text" id="webhookInput" placeholder="https://your-saas-app.com/api/webhook" style="margin-top: 5px;">
-                    
-                    <button onclick="saveSettings()" style="margin-top: 10px;">Save Settings</button>
-                    <div id="settingsStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
-                </div>
-
-                <!-- API Keys Box -->
-                <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 Developer API Keys</h3>
-                    <button onclick="generateApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate New API Key</button>
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 My API Keys</h3>
+                    <p style="color: var(--muted); font-size: 13px;">Generate your live API keys to integrate AgentPay into your apps.</p>
+                    <button onclick="generateUserApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate API Key</button>
                     <table style="margin-top: 10px;">
                         <thead><tr><th>API Key</th><th>Created At</th></tr></thead>
                         <tbody id="apiKeyTableBody">
@@ -173,28 +154,17 @@
                     </table>
                 </div>
 
-                <!-- Active Subscriptions Box -->
+                <!-- Embed Widget -->
                 <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔄 Active Subscriptions</h3>
-                    <table>
-                        <thead><tr><th>Subscriber Wallet</th><th>Plan</th><th>Monthly Amount</th><th>Status</th><th>Started At</th></tr></thead>
-                        <tbody id="subTableBody">
-                            <tr><td colspan="5" style="text-align: center; color: var(--muted);">No active subscriptions yet.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Embed Widget Box -->
-                <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget (SDK)</h3>
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget SDK</h3>
                     <textarea readonly id="embedCodeSnippet"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <p style="color: var(--muted); margin: 0;">Real-time transaction logs:</p>
+                    <p style="color: var(--muted); margin: 0;">Gateway transaction logs:</p>
                     <div>
-                        <button onclick="loadAdminStats()" style="width: auto; padding: 8px 16px; margin-right: 10px;">Refresh</button>
-                        <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #475569;">Logout</button>
+                        <button onclick="loadPortalData()" style="width: auto; padding: 8px 16px; margin-right: 10px;">Refresh</button>
+                        <button onclick="portalLogout()" style="width: auto; padding: 8px 16px; background: #475569;">Logout</button>
                     </div>
                 </div>
 
@@ -205,12 +175,12 @@
                             <th>Plan</th>
                             <th>Type</th>
                             <th>Amount</th>
-                            <th>Transaction Hash (TX)</th>
+                            <th>Transaction Hash</th>
                             <th>Timestamp</th>
                         </tr>
                     </thead>
                     <tbody id="paymentTableBody">
-                        <tr><td colspan="6" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: var(--muted);">No payments recorded yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -218,7 +188,7 @@
     </div>
 
     <footer>
-        &copy; 2026 AgentPay MVP. All rights reserved.
+        &copy; 2026 AgentPay Platform. All rights reserved.
     </footer>
 
     <script>
@@ -226,8 +196,7 @@
         let currentPlan = "Starter Plan";
         let currentAmount = 5;
         let isSubMode = false;
-        let activeNetwork = "devnet";
-        const RECIPIENT_WALLET = "CQcf...TD4q";
+        let isRegisterMode = false;
 
         window.onload = function() {
             const currentDomain = window.location.origin;
@@ -268,83 +237,89 @@
             } else {
                 document.getElementById("homeSection").style.display = "none";
                 document.getElementById("dashboardSection").style.display = "block";
-                checkLoginStatus();
+                checkPortalAuth();
             }
         }
 
-        function checkLoginStatus() {
-            const token = localStorage.getItem("admin_token");
-            if (token) {
-                document.getElementById("loginBox").style.display = "none";
-                document.getElementById("adminContent").style.display = "block";
-                loadAdminStats();
+        function switchAuthMode(mode) {
+            isRegisterMode = (mode === 'register');
+            const btnLogin = document.getElementById("tabLoginBtn");
+            const btnReg = document.getElementById("tabRegBtn");
+            const submitBtn = document.getElementById("authSubmitBtn");
+            const title = document.getElementById("formTitle");
+
+            if(isRegisterMode) {
+                btnReg.classList.add("active");
+                btnLogin.classList.remove("active");
+                submitBtn.innerText = "Register New Account";
+                title.innerText = "Create Developer Account";
             } else {
-                document.getElementById("loginBox").style.display = "block";
-                document.getElementById("adminContent").style.display = "none";
+                btnLogin.classList.add("active");
+                btnReg.classList.remove("active");
+                submitBtn.innerText = "Login to Portal";
+                title.innerText = "Developer Login";
             }
         }
 
-        async function adminLogin() {
-            const user = document.getElementById("adminUser").value;
-            const pass = document.getElementById("adminPass").value;
-            const errDiv = document.getElementById("loginError");
+        function checkPortalAuth() {
+            const token = localStorage.getItem("dev_token");
+            if (token) {
+                document.getElementById("authBox").style.display = "none";
+                document.getElementById("portalContent").style.display = "block";
+                loadPortalData();
+            } else {
+                document.getElementById("authBox").style.display = "block";
+                document.getElementById("portalContent").style.display = "none";
+            }
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById("authEmail").value;
+            const password = document.getElementById("authPassword").value;
+            const errDiv = document.getElementById("authError");
+
+            const endpoint = isRegisterMode ? "/api/auth/register" : "/api/auth/login";
 
             try {
-                const res = await fetch("/api/admin/login", {
+                const res = await fetch(endpoint, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username: user, password: pass })
+                    body: JSON.stringify({ email, password })
                 });
 
                 const data = await res.json();
-                if (data.success) {
-                    localStorage.setItem("admin_token", data.token);
-                    errDiv.innerText = "";
-                    checkLoginStatus();
+                if (res.ok && data.success) {
+                    if(isRegisterMode) {
+                        alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+                        switchAuthMode('login');
+                    } else {
+                        localStorage.setItem("dev_token", data.token);
+                        errDiv.innerText = "";
+                        checkPortalAuth();
+                    }
                 } else {
-                    errDiv.innerText = "Invalid credentials!";
+                    errDiv.innerText = data.detail || "İşlem başarısız.";
                 }
             } catch(e) {
-                errDiv.innerText = "Login failed!";
+                errDiv.innerText = "Bağlantı hatası oluştu.";
             }
         }
 
-        function adminLogout() {
-            localStorage.removeItem("admin_token");
-            checkLoginStatus();
+        function portalLogout() {
+            localStorage.removeItem("dev_token");
+            checkPortalAuth();
         }
 
-        async function saveSettings() {
-            const token = localStorage.getItem("admin_token");
-            const url = document.getElementById("webhookInput").value;
-            const net = document.getElementById("networkSelect").value;
-            const statusDiv = document.getElementById("settingsStatus");
-
+        async function generateUserApiKey() {
+            const token = localStorage.getItem("dev_token");
             try {
-                const res = await fetch("/api/admin/settings", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": token },
-                    body: JSON.stringify({ webhook_url: url, network: net })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    activeNetwork = net;
-                    statusDiv.innerText = "✓ Settings saved successfully!";
-                    setTimeout(() => statusDiv.innerText = "", 3000);
-                }
-            } catch(e) { alert("Failed to save settings"); }
-        }
-
-        async function generateApiKey() {
-            const token = localStorage.getItem("admin_token");
-            try {
-                const res = await fetch("/api/admin/apikey/generate", {
+                const res = await fetch("/api/user/apikey/generate", {
                     method: "POST",
                     headers: { "Authorization": token }
                 });
                 const data = await res.json();
-                if(data.success) { loadAdminStats(); }
-            } catch(e) { alert("Failed to generate API key"); }
+                if(data.success) { loadPortalData(); }
+            } catch(e) { alert("API anahtarı üretilemedi."); }
         }
 
         async function connectWallet() {
@@ -367,12 +342,11 @@
 
         async function sendUSDC() {
             if (!userWallet) { alert("Please connect your wallet first!"); return; }
-
-            document.getElementById("status").innerText = "Preparing transaction (" + activeNetwork + ")...";
+            document.getElementById("status").innerText = "Preparing transaction (devnet)...";
 
             try {
-                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl(activeNetwork), 'confirmed');
-                const recipientPubKey = new solanaWeb3.PublicKey(RECIPIENT_WALLET);
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
+                const recipientPubKey = new solanaWeb3.PublicKey("CQcf...TD4q");
 
                 const transaction = new solanaWeb3.Transaction().add(
                     solanaWeb3.SystemProgram.transfer({
@@ -404,7 +378,7 @@
                 });
 
                 document.getElementById("status").innerText = "Payment completed successfully!";
-                alert("Subscription/Payment successfully verified and recorded!");
+                alert("Payment successfully verified and recorded!");
 
             } catch (error) {
                 console.error(error);
@@ -412,27 +386,20 @@
             }
         }
 
-        async function loadAdminStats() {
+        async function loadPortalData() {
             try {
-                const token = localStorage.getItem("admin_token");
-                const res = await fetch("/api/admin/stats", {
+                const token = localStorage.getItem("dev_token");
+                const res = await fetch("/api/user/dashboard", {
                     headers: { "Authorization": token }
                 });
                 
-                if (!res.ok) { adminLogout(); return; }
+                if (!res.ok) { portalLogout(); return; }
 
                 const data = await res.json();
                 
                 document.getElementById("totalRevenue").innerText = data.total_revenue + " USDC";
                 document.getElementById("totalTx").innerText = data.total_transactions;
-                document.getElementById("totalSubs").innerText = data.total_subscriptions;
-                if(data.webhook_url) { document.getElementById("webhookInput").value = data.webhook_url; }
-                if(data.network) {
-                    document.getElementById("networkSelect").value = data.network;
-                    activeNetwork = data.network;
-                }
 
-                // API Keys Tablosu
                 const apiKeyTbody = document.getElementById("apiKeyTableBody");
                 apiKeyTbody.innerHTML = "";
                 if(!data.api_keys || data.api_keys.length === 0) {
@@ -443,39 +410,25 @@
                     });
                 }
 
-                // Subscriptions Tablosu
-                const subTbody = document.getElementById("subTableBody");
-                subTbody.innerHTML = "";
-                if(!data.subscriptions || data.subscriptions.length === 0) {
-                    subTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted);">No active subscriptions yet.</td></tr>`;
-                } else {
-                    data.subscriptions.forEach(s => {
-                        subTbody.innerHTML += `<tr><td>${s.subscriber_wallet.slice(0, 6)}...${s.subscriber_wallet.slice(-4)}</td><td>${s.plan_name}</td><td>${s.monthly_amount} USDC</td><td><span style="color:var(--accent)">● ${s.status}</span></td><td>${s.started_at}</td></tr>`;
-                    });
-                }
-
-                // Transactions Tablosu
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
-
-                if(data.payments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>`;
+                if(!data.payments || data.payments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted);">No payments recorded yet.</td></tr>`;
                     return;
                 }
 
                 data.payments.forEach(p => {
-                    const explorerCluster = activeNetwork === 'mainnet-beta' ? '' : '?cluster=devnet';
                     const row = `<tr>
                         <td>${p.sender_wallet.slice(0, 6)}...${p.sender_wallet.slice(-4)}</td>
                         <td>${p.plan_name}</td>
                         <td><span style="color: ${p.type === 'Abonelik' ? '#c084fc' : '#38bdf8'}">${p.type}</span></td>
                         <td>${p.amount} USDC</td>
-                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}${explorerCluster}" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
+                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}?cluster=devnet" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
                         <td>${p.timestamp}</td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
-            } catch(e) { console.error("Could not load stats", e); }
+            } catch(e) { console.error("Could not load portal data", e); }
         }
     </script>
 </body>
