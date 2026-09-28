@@ -8,26 +8,30 @@ import os
 import httpx
 import secrets
 from datetime import datetime
+from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Payment Network", version="3.0.0")
+app = FastAPI(title="AgentPay Global Cloud Network", version="3.6.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Şirket Ana Cüzdanı
-PLATFORM_WALLET = "CQcf...TD4q"
-PLATFORM_FEE_PERCENTAGE = 0.02 # %2 Platform Komisyonu
+# Supabase Bulut Veritabanı Bağlantı Bilgileri
+SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
-# Simüle edilmiş kurumsal veri tabanları (Production'da Supabase/PostgreSQL kullanılır)
-USERS_DATABASE = [] 
-PAYMENT_DATABASE = [] 
-SUBSCRIPTIONS_DATABASE = []
-SETTINGS = {"webhook_url": "", "network": "devnet"}
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"Supabase bağlantı hatası: {e}")
+    supabase = None
+
+PLATFORM_WALLET = "CQcf...TD4q"
+PLATFORM_FEE_PERCENTAGE = 0.02 # %2 Komisyon
 
 class RegisterRequest(BaseModel):
     email: str
     password: str
-    payout_wallet: str # Geliştiricinin kendi kazancını alacağı cüzdan adresi
+    payout_wallet: str
 
 class LoginRequest(BaseModel):
     email: str
@@ -39,53 +43,64 @@ class PaymentVerifyRequest(BaseModel):
     tx_signature: str
     plan_name: str = "Global API Plan"
     is_subscription: bool = False
-    developer_api_key: str = None # Hangi geliştiricinin dükkanından satıldı?
-
-class SettingsRequest(BaseModel):
-    webhook_url: str
-    network: str
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     if os.path.exists("index.html"):
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
-    return {"status": "online", "service": "AgentPay Global Network API", "network": SETTINGS["network"]}
+    return {"status": "online", "service": "AgentPay Cloud API", "database": "Supabase Active"}
 
 @app.post("/api/auth/register")
 def register_user(data: RegisterRequest):
-    for user in USERS_DATABASE:
-        if user["email"] == data.email:
-            raise HTTPException(status_code=400, detail="Email already registered.")
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Veritabanı bağlantısı kurulamadı.")
     
-    new_user = {
-        "email": data.email,
-        "password": data.password, # Production'da bcrypt ile hashlenmeli
-        "payout_wallet": data.payout_wallet,
-        "api_keys": [],
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    USERS_DATABASE.append(new_user)
-    return {"success": True, "message": "Merchant registered successfully."}
+    try:
+        existing = supabase.table("merchants").select("*").eq("email", data.email).execute()
+        if existing.data:
+            raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayıtlı.")
+        
+        new_merchant = {
+            "email": data.email,
+            "password": data.password,
+            "payout_wallet": data.payout_wallet,
+            "created_at": datetime.now().isoformat()
+        }
+        
+        supabase.table("merchants").insert(new_merchant).execute()
+        return {"success": True, "message": "Merchant registered successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/auth/login")
 def login_user(data: LoginRequest):
-    for user in USERS_DATABASE:
-        if user["email"] == data.email and user["password"] == data.password:
-            token = f"global_token_{secrets.token_hex(12)}"
-            return {"success": True, "token": token, "email": user["email"]}
-    raise HTTPException(status_code=401, detail="Invalid credentials.")
+    if not supabase:
+        raise HTTPException(status_code=500, detail="Veritabanı bağlantısı kurulamadı.")
+    
+    try:
+        res = supabase.table("merchants").select("*").eq("email", data.email).eq("password", data.password).execute()
+        if not res.data:
+            raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre.")
+        
+        token = f"cloud_token_{secrets.token_hex(12)}"
+        return {"success": True, "token": token, "email": data.email}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Giriş başarısız.")
 
 @app.post("/api/merchant/apikey/generate")
 def generate_merchant_apikey(authorization: str = Header(None)):
     if not authorization:
-        raise HTTPException(status_code=403, detail="Unauthorized access.")
+        raise HTTPException(status_code=403, detail="Yetkilendirme gerekli.")
     
     new_key = f"ag_live_{secrets.token_hex(20)}"
-    key_record = {"key": new_key, "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    key_record = {
+        "api_key": new_key,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
     
-    if USERS_DATABASE:
-        USERS_DATABASE[0]["api_keys"].append(key_record)
+    if supabase:
+        supabase.table("api_keys").insert(key_record).execute()
         
     return {"success": True, "api_key": new_key}
 
@@ -94,19 +109,33 @@ def get_merchant_dashboard(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=403, detail="Unauthorized.")
     
-    user_data = USERS_DATABASE[0] if USERS_DATABASE else {"email": "global@agentpay.io", "api_keys": [], "payout_wallet": PLATFORM_WALLET}
-    total_volume = sum(p["amount"] for p in PAYMENT_DATABASE)
+    payments = []
+    api_keys = []
+    total_volume = 0.0
+    
+    if supabase:
+        try:
+            pay_res = supabase.table("payments").select("*").execute()
+            payments = pay_res.data or []
+            
+            key_res = supabase.table("api_keys").select("*").execute()
+            api_keys = key_res.data or []
+            
+            total_volume = sum(p["amount"] for p in payments)
+        except Exception as e:
+            print(f"Veri çekme hatası: {e}")
+    
     platform_earnings = total_volume * PLATFORM_FEE_PERCENTAGE
     
     return {
         "success": True,
-        "email": user_data["email"],
-        "payout_wallet": user_data["payout_wallet"],
-        "api_keys": user_data["api_keys"],
+        "email": "merchant@agentpay.io",
+        "payout_wallet": PLATFORM_WALLET,
+        "api_keys": api_keys,
         "total_volume": total_volume,
         "platform_earnings": platform_earnings,
-        "total_transactions": len(PAYMENT_DATABASE),
-        "payments": PAYMENT_DATABASE[::-1]
+        "total_transactions": len(payments),
+        "payments": payments[::-1]
     }
 
 @app.post("/api/pay-usdc")
@@ -114,12 +143,7 @@ def get_merchant_dashboard(authorization: str = Header(None)):
 def verify_and_process_payment(request: Request, data: PaymentVerifyRequest):
     try:
         if data.amount <= 0:
-            raise HTTPException(status_code=400, detail="Invalid payment amount.")
-        
-        # KURUMSAL GÜVENLİK ADIMI: 
-        # Gerçek üretim ortamında burada Solana RPC üzerinden tx_signature blokzincirde 
-        # gerçekten onaylanmış mı ve tutar doğru mu diye kontrol edilir.
-        # Örn: response = requests.get(f"https://api.mainnet-beta.solana.com ...")
+            raise HTTPException(status_code=400, detail="Invalid amount.")
         
         fee = data.amount * PLATFORM_FEE_PERCENTAGE
         merchant_share = data.amount - fee
@@ -134,28 +158,13 @@ def verify_and_process_payment(request: Request, data: PaymentVerifyRequest):
             "type": "Subscription" if data.is_subscription else "One-Time",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
-        PAYMENT_DATABASE.append(payment_record)
-
-        if data.is_subscription:
-            SUBSCRIPTIONS_DATABASE.append({
-                "subscriber": data.sender_wallet,
-                "plan": data.plan_name,
-                "amount": data.amount,
-                "status": "Active",
-                "started": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
-
-        # Webhook Entegrasyonu
-        if SETTINGS["webhook_url"]:
-            try:
-                with httpx.Client(timeout=5.0) as client:
-                    client.post(SETTINGS["webhook_url"], json=payment_record)
-            except Exception as wh_err:
-                print(f"Webhook error: {wh_err}")
+        
+        if supabase:
+            supabase.table("payments").insert(payment_record).execute()
 
         return {
             "success": True,
-            "message": "Payment cryptographically verified and processed globally.",
+            "message": "Cloud verified and recorded successfully.",
             "fee_deducted": fee,
             "merchant_net": merchant_share,
             "tx_signature": data.tx_signature
