@@ -11,11 +11,11 @@ from datetime import datetime
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.0.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.1.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Supabase Bulut Veritabanı Bağlantısı
+# Supabase Bulut Veritabanı Bağlantısı (Doğrulanmış JWT Anahtarı)
 SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
@@ -44,7 +44,7 @@ class PaymentSplitVerifyRequest(BaseModel):
     tx_signature: str
     plan_name: str = "Global Enterprise API"
     is_subscription: bool = False
-    token_type: str = "USDC" # Desteklenen Tokenler: USDC, USDT, SOL
+    token_type: str = "USDC"
     webhook_url: str = None
 
 @app.get("/", response_class=HTMLResponse)
@@ -173,7 +173,6 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
         if supabase:
             supabase.table("payments").insert(payment_record).execute()
 
-        # Webhook tetikleme
         if data.webhook_url:
             try:
                 webhook_payload = {
