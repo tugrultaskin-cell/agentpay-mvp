@@ -8,7 +8,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Header / Navbar -->
+    <!-- Header / Navbar (Gizli yazı/buton içermez, tamamen profesyonel görünüm) -->
     <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -20,10 +20,9 @@
                 <a href="#multichain" class="hover:text-emerald-400 transition">Multi-Chain</a>
                 <a href="#escrow" class="hover:text-emerald-400 transition">AI Escrow</a>
                 <a href="#pricing" class="hover:text-emerald-400 transition">Pricing (%1.5)</a>
-                <a href="#admin-login" class="text-emerald-400 font-semibold hover:underline">🔒 Secret Dashboard</a>
             </nav>
             <div class="flex items-center space-x-4">
-                <a href="#admin-login" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-4 py-2 rounded-lg text-sm font-semibold transition border border-emerald-500/30">Admin Login</a>
+                <a href="/docs" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-semibold transition border border-slate-700">API Docs</a>
                 <a href="#sdk" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-emerald-500/20">Get Started</a>
             </div>
         </div>
@@ -48,7 +47,7 @@
         </div>
         <div class="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold mb-6">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>v14.0 Enterprise Edition — Secure Private Stats Enabled</span>
+            <span>v14.0 Enterprise Edition Live on Solana, Base & Arbitrum</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight mb-6">
             The Autonomous Web3 Payment Gateway for <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">AI Agents & Global SaaS</span>.
@@ -61,8 +60,8 @@
                 <span>Explore SDK & Widgets</span>
                 <span>→</span>
             </a>
-            <a href="#admin-login" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 px-8 py-4 rounded-xl font-bold text-base transition flex items-center justify-center">
-                🔒 Access Secret Dashboard
+            <a href="/docs" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 px-8 py-4 rounded-xl font-bold text-base transition flex items-center justify-center">
+                API Documentation
             </a>
         </div>
     </section>
@@ -92,16 +91,15 @@
         </div>
     </section>
 
-    <!-- Sadece Sana Özel Gizli Yönetim Paneli (Admin Login & Dashboard Section) -->
+    <!-- Tamamen Gizli Yönetim Paneli (Normalde görünmez, sadece URL'deki #admin-hash ile veya oturum açıksa görünür) -->
     <section id="admin-login" class="max-w-4xl mx-auto px-6 py-16 border-t border-slate-900">
-        <div class="bg-slate-900/80 border border-emerald-500/40 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-wider">Restricted Area</div>
+        <div class="bg-slate-900/80 border border-slate-800 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
             
             <div id="login-container">
                 <div class="text-center mb-8">
-                    <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mx-auto mb-4">🔐</div>
-                    <h2 class="text-2xl font-bold text-slate-100">Private Owner Dashboard</h2>
-                    <p class="text-slate-400 text-sm mt-1">Enter credentials to view encrypted platform statistics.</p>
+                    <div class="w-12 h-12 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-center text-slate-300 text-2xl mx-auto mb-4">🔒</div>
+                    <h2 class="text-2xl font-bold text-slate-100">Private Owner Portal</h2>
+                    <p class="text-slate-400 text-sm mt-1">Authorized access only.</p>
                 </div>
                 <form id="secretLoginForm" class="space-y-4 max-w-md mx-auto">
                     <div>
@@ -112,8 +110,8 @@
                         <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
                         <input type="password" id="secPass" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Password">
                     </div>
-                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 mt-2">Unlock Private Stats</button>
-                    <p id="loginError" class="text-red-400 text-xs text-center mt-2 hidden">Invalid credentials. Access denied.</p>
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold py-3 rounded-xl transition shadow-lg mt-2">Authenticate</button>
+                    <p id="loginError" class="text-red-400 text-xs text-center mt-2 hidden">Invalid credentials.</p>
                 </form>
             </div>
 
@@ -213,12 +211,28 @@
                 demoWidget.render('agentpay-demo-container');
             }
 
-            // Secret Admin Login Handler
+            // Secret Admin Login Handler & Auto-Hide
             const loginForm = document.getElementById('secretLoginForm');
             const loginContainer = document.getElementById('login-container');
             const dashContainer = document.getElementById('dashboard-container');
+            const adminSection = document.getElementById('admin-login');
             const loginError = document.getElementById('loginError');
             const logoutBtn = document.getElementById('logoutBtn');
+
+            // Eğer hash #admin-login değilse ve oturum açık değilse gizli bölümü tamamen görünmez yap
+            function checkVisibility() {
+                const isAuthed = localStorage.getItem('agentpay_owner_auth') === 'true';
+                const isHashMatch = window.location.hash === '#admin-login';
+
+                if (!isAuthed && !isHashMatch) {
+                    adminSection.style.display = 'none';
+                } else {
+                    adminSection.style.display = 'block';
+                }
+            }
+
+            window.addEventListener('hashchange', checkVisibility);
+            checkVisibility();
 
             // Oturum kontrolü (Local storage)
             if (localStorage.getItem('agentpay_owner_auth') === 'true') {
@@ -249,11 +263,12 @@
                 loginContainer.classList.remove('hidden');
                 document.getElementById('secUser').value = '';
                 document.getElementById('secPass').value = '';
+                window.location.hash = '';
+                adminSection.style.display = 'none';
             });
 
             async function fetchDashboardData() {
                 try {
-                    // Dahili merchant dashboard API verisini çekiyoruz
                     const res = await fetch('/api/merchant/dashboard', {
                         headers: { 'Authorization': 'Bearer owner_master_token_secure' }
                     });
