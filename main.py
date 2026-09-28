@@ -11,13 +11,13 @@ from datetime import datetime
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Split-Payment Gateway", version="4.3.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Supabase Bulut Veritabanı Bağlantı Bilgileri (Doğrulanmış Doğru JWT Key)
+# Supabase Bulut Veritabanı Bağlantısı
 SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eGFieXJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -26,7 +26,7 @@ except Exception as e:
     supabase = None
 
 PLATFORM_WALLET = "CQcf...TD4q"
-PLATFORM_FEE_PERCENTAGE = 0.02 # %2 Sabit Platform Komisyonu
+PLATFORM_FEE_PERCENTAGE = 0.015 # %1.5 Erişilebilir Komisyon Oranı
 
 class RegisterRequest(BaseModel):
     email: str
@@ -44,13 +44,15 @@ class PaymentSplitVerifyRequest(BaseModel):
     tx_signature: str
     plan_name: str = "Global Enterprise API"
     is_subscription: bool = False
+    token_type: str = "USDC" # Desteklenen Tokenler: USDC, USDT, SOL
+    webhook_url: str = None
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     if os.path.exists("index.html"):
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
-    return {"status": "online", "service": "AgentPay Global Split-Payment API", "mode": "Production Ready"}
+    return {"status": "online", "service": "AgentPay Global Multi-Token Gateway", "mode": "Production Ready"}
 
 @app.get("/docs", response_class=HTMLResponse)
 def read_docs():
@@ -163,7 +165,7 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
             "platform_fee": platform_fee,
             "merchant_payout": merchant_net_payout,
             "tx_signature": data.tx_signature,
-            "plan_name": data.plan_name,
+            "plan_name": f"{data.plan_name} ({data.token_type})",
             "type": "Subscription" if data.is_subscription else "One-Time Split",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
@@ -171,12 +173,31 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
         if supabase:
             supabase.table("payments").insert(payment_record).execute()
 
+        # Webhook tetikleme
+        if data.webhook_url:
+            try:
+                webhook_payload = {
+                    "event": "payment.success",
+                    "sender_wallet": data.sender_wallet,
+                    "amount": data.amount,
+                    "token_type": data.token_type,
+                    "merchant_payout": merchant_net_payout,
+                    "platform_fee": platform_fee,
+                    "tx_signature": data.tx_signature,
+                    "plan_name": data.plan_name,
+                    "timestamp": payment_record["timestamp"]
+                }
+                httpx.post(data.webhook_url, json=webhook_payload, timeout=3.0)
+            except Exception as wh_err:
+                print(f"Webhook gönderilemedi: {wh_err}")
+
         return {
             "success": True,
-            "message": "Global split-payment verified and routed successfully.",
+            "message": f"Global multi-token ({data.token_type}) split-payment verified & routed successfully.",
             "gross_amount": data.amount,
-            "platform_fee_2_percent": platform_fee,
-            "merchant_net_98_percent": merchant_net_payout,
+            "token_type": data.token_type,
+            "platform_fee_1_5_percent": platform_fee,
+            "merchant_net_98_5_percent": merchant_net_payout,
             "tx_signature": data.tx_signature
         }
     except Exception as e:
