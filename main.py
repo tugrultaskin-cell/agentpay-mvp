@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway [Full Enterprise Edition]", version="10.0.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway [AI Agent Escrow Edition]", version="11.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -47,6 +47,14 @@ class PaymentSplitVerifyRequest(BaseModel):
     token_type: str = "USDC"
     webhook_url: str = None
 
+# Yeni Eklenen AI Ajan Bütçe ve Emanet Modeli
+class AIAgentEscrowRequest(BaseModel):
+    agent_id: str
+    daily_spend_limit: float
+    current_spent: float = 0.0
+    escrow_amount: float
+    task_description: str
+
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     if os.path.exists("index.html"):
@@ -81,21 +89,21 @@ def get_developer_sdk():
 
             container.innerHTML = `
                 <div style="font-family: sans-serif; background: #111; color: #fff; padding: 20px; border-radius: 12px; width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #10B981;">⚡ AgentPay Checkout</h3>
-                    <p style="margin: 0 0 15px 0; font-size: 14px; color: #aaa;">Plan: ${this.planName} ${this.isSubscription ? '(Monthly)' : ''}</p>
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #10B981;">⚡ AgentPay AI Escrow</h3>
+                    <p style="margin: 0 0 15px 0; font-size: 14px; color: #aaa;">Plan: ${this.planName}</p>
                     <div style="font-size: 22px; font-weight: bold; margin-bottom: 15px;">${this.amount} ${this.tokenType}</div>
-                    <button id="agentPayBtn" style="width: 100%; background: #10B981; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Pay with Crypto</button>
+                    <button id="agentPayBtn" style="width: 100%; background: #10B981; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Autonomous Pay</button>
                 </div>
             `;
 
             document.getElementById('agentPayBtn').onclick = async () => {
-                const mockSignature = 'TestSDK_Enterprise_Sig_' + Math.random().toString(36).substring(7);
+                const mockSignature = 'TestAI_Escrow_Sig_' + Math.random().toString(36).substring(7);
                 try {
                     const response = await fetch('https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            sender_wallet: 'SDK_Enterprise_Wallet_111',
+                            sender_wallet: 'AI_Agent_Wallet_Autonomous_111',
                             merchant_api_key: this.apiKey,
                             amount: this.amount,
                             tx_signature: mockSignature,
@@ -170,6 +178,21 @@ def generate_merchant_apikey(authorization: str = Header(None)):
         
     return {"success": True, "api_key": new_key}
 
+# Yapay Zeka Ajanı Otonom Emanet ve Bütçe Kontrol Endpoint'i
+@app.post("/api/agent/escrow")
+def agent_escrow_control(data: AIAgentEscrowRequest):
+    if (data.current_spent + data.escrow_amount) > data.daily_spend_limit:
+        raise HTTPException(status_code=403, detail="AI Agent daily budget limit exceeded. Escrow rejected.")
+    
+    return {
+        "success": True,
+        "agent_id": data.agent_id,
+        "status": "Escrow Locked",
+        "allocated_amount": data.escrow_amount,
+        "remaining_daily_limit": data.daily_spend_limit - (data.current_spent + data.escrow_amount),
+        "message": "AI Agent autonomous escrow secured successfully pending task verification."
+    }
+
 @app.get("/api/merchant/dashboard")
 def get_merchant_dashboard(authorization: str = Header(None)):
     if not authorization:
@@ -193,7 +216,6 @@ def get_merchant_dashboard(authorization: str = Header(None)):
     
     platform_earnings = total_volume * PLATFORM_FEE_PERCENTAGE
     
-    # Görsel Analitik Dağılımları Hesaplama
     token_breakdown = {}
     for p in payments:
         t_type = p.get("token_type", "USDC")
@@ -273,7 +295,7 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
 
         return {
             "success": True,
-            "message": f"Global enterprise split-payment with visual analytics processed successfully.",
+            "message": f"Global AI Agent Escrow & split-payment processed successfully.",
             "gross_amount": data.amount,
             "token_type": data.token_type,
             "is_subscription": data.is_subscription,
