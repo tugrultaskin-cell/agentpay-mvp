@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay — Global Multi-Token Web3 Payment Gateway</title>
+    <title>AgentPay — Global Enterprise Multi-Chain Web3 Payment Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
@@ -17,8 +17,9 @@
             </div>
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-400">
                 <a href="#features" class="hover:text-emerald-400 transition">Features</a>
-                <a href="#pricing" class="hover:text-emerald-400 transition">Pricing (%1.5 Fee)</a>
-                <a href="#sdk" class="hover:text-emerald-400 transition">SDK & Widget</a>
+                <a href="#multichain" class="hover:text-emerald-400 transition">Multi-Chain</a>
+                <a href="#escrow" class="hover:text-emerald-400 transition">AI Escrow</a>
+                <a href="#pricing" class="hover:text-emerald-400 transition">Pricing (%1.5)</a>
                 <a href="/docs" class="hover:text-emerald-400 transition">API Docs</a>
             </nav>
             <div class="flex items-center space-x-4">
@@ -28,6 +29,18 @@
         </div>
     </header>
 
+    <!-- Live Ticker Bar (Oracle FX Rates) -->
+    <div class="bg-emerald-950/40 border-b border-emerald-500/20 py-2 overflow-hidden whitespace-nowrap">
+        <div class="inline-flex space-x-12 animate-marquee text-xs font-mono text-emerald-400 px-4">
+            <span>⚡ Pyth Network Oracle Live Feed:</span>
+            <span>SOL/USD: $145.50</span>
+            <span>USDC/USD: $1.00</span>
+            <span>USDT/USD: $1.00</span>
+            <span>Networks Active: Solana, Base, Arbitrum</span>
+            <span>Platform Fee: 1.5% Fixed</span>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="max-w-7xl mx-auto px-6 py-20 text-center relative">
         <div class="absolute inset-0 -z-10 flex items-center justify-center opacity-20 blur-3xl">
@@ -35,13 +48,13 @@
         </div>
         <div class="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold mb-6">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>v10.0 Enterprise Edition Live on Solana</span>
+            <span>v14.0 Enterprise Edition — Multi-Chain & AI Escrow Live</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight mb-6">
-            The World's Most Accessible <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Web3 Payment Gateway</span> for AI Agents & Developers.
+            The Autonomous Web3 Payment Gateway for <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">AI Agents & Global SaaS</span>.
         </h1>
         <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-            Instant split-payments, recurring subscriptions, multi-token support (USDC, USDT, SOL), and on-chain verification with industry-low <span class="text-emerald-400 font-bold">1.5% fee</span>.
+            Accept crypto across Solana, Base, and Arbitrum. Features AI agent escrow budgets, Pyth Oracle FX rates, and direct global bank payouts with a <span class="text-emerald-400 font-bold">1.5% fixed fee</span>.
         </p>
         <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
             <a href="#sdk" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-8 py-4 rounded-xl font-extrabold text-base transition shadow-xl shadow-emerald-500/20 flex items-center justify-center space-x-2">
@@ -57,24 +70,24 @@
     <!-- Features Grid -->
     <section id="features" class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-900">
         <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold mb-3">Enterprise-Grade Infrastructure</h2>
-            <p class="text-slate-400 text-sm">Built from the ground up for high-frequency transactions and autonomous AI agents.</p>
+            <h2 class="text-3xl font-bold mb-3">Enterprise-Grade Architecture</h2>
+            <p class="text-slate-400 text-sm">Engineered for autonomous AI agents, high-frequency merchants, and global scale.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl hover:border-emerald-500/50 transition">
-                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mb-6">🔗</div>
-                <h3 class="text-lg font-bold mb-2">On-Chain Verification</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">Cryptographic validation of Solana transaction signatures ensuring zero fraud and instant settlement.</p>
+            <div id="escrow" class="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl hover:border-emerald-500/50 transition">
+                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mb-6">🤖</div>
+                <h3 class="text-lg font-bold mb-2">AI Agent Escrow & Budgets</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Autonomous AI agents can secure conditional escrows with strict daily spending limits and automated task verification.</p>
+            </div>
+            <div id="multichain" class="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl hover:border-emerald-500/50 transition">
+                <div class="w-12 h-12 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-center text-teal-400 text-2xl mb-6">🌐</div>
+                <h3 class="text-lg font-bold mb-2">Multi-Chain Routing</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Seamless payment settlement across high-speed networks including Solana, Base (Coinbase), and Arbitrum.</p>
             </div>
             <div class="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl hover:border-emerald-500/50 transition">
-                <div class="w-12 h-12 bg-teal-500/10 border border-teal-500/20 rounded-xl flex items-center justify-center text-teal-400 text-2xl mb-6">🔄</div>
-                <h3 class="text-lg font-bold mb-2">Recurring Subscriptions</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">Automated billing cycles, next-billing date tracking, and webhook triggers for SaaS applications.</p>
-            </div>
-            <div class="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl hover:border-emerald-500/50 transition">
-                <div class="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center text-cyan-400 text-2xl mb-6">💎</div>
-                <h3 class="text-lg font-bold mb-2">Multi-Token Ecosystem</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">Seamlessly accept payments in USDC, USDT, and native SOL with automated split-routing.</p>
+                <div class="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-xl flex items-center justify-center text-cyan-400 text-2xl mb-6">🏦</div>
+                <h3 class="text-lg font-bold mb-2">Global Bank Payouts</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Direct off-ramp capabilities allowing merchants to settle funds straight into international bank accounts worldwide.</p>
             </div>
         </div>
     </section>
@@ -82,41 +95,42 @@
     <!-- Pricing / Fee Model -->
     <section id="pricing" class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-900 text-center">
         <h2 class="text-3xl font-bold mb-3">Fair & Accessible Pricing</h2>
-        <p class="text-slate-400 text-sm mb-12">No hidden setup fees. Only pay when you get paid.</p>
+        <p class="text-slate-400 text-sm mb-12">No setup costs. Only pay when transactions settle.</p>
         <div class="max-w-md mx-auto bg-gradient-to-b from-slate-900 to-slate-900/60 border border-emerald-500/30 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-wider">Most Popular</div>
-            <h3 class="text-xl font-bold mb-2 text-slate-200">Micro & Growth Tier</h3>
+            <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-wider">Enterprise</div>
+            <h3 class="text-xl font-bold mb-2 text-slate-200">Global Scale Tier</h3>
             <div class="text-5xl font-black text-emerald-400 my-6">1.5% <span class="text-lg font-normal text-slate-400">/ transaction</span></div>
             <ul class="text-left text-sm text-slate-300 space-y-3 mb-8">
-                <li class="flex items-center space-x-2"><span>✅</span><span>Instant Split-Payment (98.5% Merchant / 1.5% Platform)</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Multi-Token Support (USDC, USDT, SOL)</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Real-time Webhook Dispatcher</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Embeddable JS SDK & Checkout Widget</span></li>
+                <li class="flex items-center space-x-2"><span>✅</span><span>Instant Split (98.5% Merchant / 1.5% Platform)</span></li>
+                <li class="flex items-center space-x-2"><span>✅</span><span>Multi-Chain Support (Solana, Base, Arbitrum)</span></li>
+                <li class="flex items-center space-x-2"><span>✅</span><span>AI Agent Escrow & Daily Limits</span></li>
+                <li class="flex items-center space-x-2"><span>✅</span><span>Pyth Network Oracle FX Rates</span></li>
+                <li class="flex items-center space-x-2"><span>✅</span><span>Global Bank Payout Off-Ramp</span></li>
             </ul>
             <a href="/docs" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">Start Accepting Payments</a>
         </div>
     </section>
 
-    <!-- Interactive SDK Preview Section -->
+    <!-- Interactive SDK & Multi-Chain Preview Section -->
     <section id="sdk" class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-900">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
                 <span class="text-emerald-400 text-xs font-bold uppercase tracking-widest">Developer First</span>
-                <h2 class="text-3xl font-bold mt-2 mb-4">Embed Checkout in 1-Line of Code</h2>
+                <h2 class="text-3xl font-bold mt-2 mb-4">Multi-Chain Checkout Widget</h2>
                 <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                    Include our lightweight SDK script (`sdk.js`) on your website and instantly render secure crypto checkout modals for your users and AI agents.
+                    Embed our secure checkout widget with network selection (Solana, Base, Arbitrum) using a single line of JavaScript code.
                 </p>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-300 overflow-x-auto mb-6">
                     &lt;script src="https://agentpay-mvp-production-57ee.up.railway.app/sdk.js"&gt;&lt;/script&gt;<br>
                     &lt;div id="checkout"&gt;&lt;/div&gt;<br>
                     &lt;script&gt;<br>
-                    &nbsp;&nbsp;const widget = new AgentPayWidget({ apiKey: 'ag_live_xxx', amount: 50, tokenType: 'USDT' });<br>
+                    &nbsp;&nbsp;const widget = new AgentPayWidget({ apiKey: 'ag_live_xxx', amount: 100, network: 'Solana' });<br>
                     &nbsp;&nbsp;widget.render('checkout');<br>
                     &lt;/script&gt;
                 </div>
             </div>
             <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center">
-                <div class="text-sm font-semibold text-slate-400 mb-4">Live Interactive Widget Preview:</div>
+                <div class="text-sm font-semibold text-slate-400 mb-4">Interactive Widget Preview:</div>
                 <div id="agentpay-demo-container"></div>
             </div>
         </div>
@@ -124,7 +138,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
-        <p>&copy; 2026 AgentPay Global Network. All rights reserved. Powered by Solana & Supabase.</p>
+        <p>&copy; 2026 AgentPay Global Network. All rights reserved. Powered by Solana, Base, Arbitrum & Supabase.</p>
     </footer>
 
     <!-- Widget Demo Script Execution -->
@@ -134,11 +148,11 @@
             if (window.AgentPayWidget) {
                 const demoWidget = new AgentPayWidget({
                     apiKey: 'ag_live_demo_key999',
-                    amount: 99.0,
+                    amount: 150.0,
                     tokenType: 'USDC',
-                    planName: 'Global AI Agent Pro',
-                    isSubscription: true,
-                    onSuccess: (res) => alert('Demo Payment Success! Tx: ' + res.tx_signature),
+                    network: 'Solana',
+                    planName: 'AI Agent Enterprise Suite',
+                    onSuccess: (res) => alert('Multi-Chain Payment Success! Tx: ' + res.tx_signature),
                     onError: (err) => alert('Payment Error occurred')
                 });
                 demoWidget.render('agentpay-demo-container');
