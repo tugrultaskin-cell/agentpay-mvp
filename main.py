@@ -6,22 +6,21 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
 import httpx
+import secrets
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Mainnet Ready", version="1.6.0")
+app = FastAPI(title="AgentPay Developer Ecosystem", version="1.7.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-USDC_MINT_DEVNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # Gerçek USDC Mint adresi (Solana Mainnet)
 
 # Yönetici bilgileri
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "gizlisifre123"
 
 PAYMENT_DATABASE = []
-SETTINGS = {"webhook_url": "", "network": "devnet"} # devnet veya mainnet
+SETTINGS = {"webhook_url": "", "network": "devnet"}
+API_KEYS = [] # Geliştirici API anahtarları listesi
 
 class PaymentRequest(BaseModel):
     sender_wallet: str
@@ -58,6 +57,19 @@ def save_settings(data: SettingsRequest, authorization: str = Header(None)):
     SETTINGS["network"] = data.network
     return {"success": True, "message": "Ayarlar başarıyla güncellendi."}
 
+@app.post("/api/admin/apikey/generate")
+def generate_api_key(authorization: str = Header(None)):
+    if not authorization or authorization != "agentpay_secure_admin_token_2026":
+        raise HTTPException(status_code=403, detail="Unauthorized access.")
+    
+    new_key = f"ag_live_{secrets.token_hex(16)}"
+    key_record = {
+        "key": new_key,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    API_KEYS.append(key_record)
+    return {"success": True, "api_key": new_key}
+
 @app.get("/api/admin/stats")
 def get_admin_stats(authorization: str = Header(None)):
     if not authorization or authorization != "agentpay_secure_admin_token_2026":
@@ -72,6 +84,7 @@ def get_admin_stats(authorization: str = Header(None)):
         "total_transactions": total_transactions,
         "webhook_url": SETTINGS["webhook_url"],
         "network": SETTINGS["network"],
+        "api_keys": API_KEYS,
         "payments": PAYMENT_DATABASE[::-1]
     }
 

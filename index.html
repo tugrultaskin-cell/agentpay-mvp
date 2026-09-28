@@ -110,7 +110,7 @@
                 <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Protected Data, Stats, Webhook & Mainnet Settings -->
+            <!-- Protected Data, Stats, Webhook, API Keys & Settings -->
             <div id="adminContent" style="display: none;">
                 <!-- Analytics Cards -->
                 <div class="stats-grid">
@@ -124,9 +124,9 @@
                     </div>
                 </div>
 
-                <!-- Settings Box: Network & Webhook (Adım 4) -->
+                <!-- Settings Box: Network & Webhook -->
                 <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">⚙️ Gateway Settings (Mainnet / Devnet & Webhook)</h3>
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">⚙️ Gateway Settings</h3>
                     
                     <label style="font-size: 13px; color: var(--muted);">Solana Network Mode</label>
                     <select id="networkSelect">
@@ -139,6 +139,27 @@
                     
                     <button onclick="saveSettings()" style="margin-top: 10px;">Save Settings</button>
                     <div id="settingsStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
+                </div>
+
+                <!-- API Key Management Box (Yepyeni Özellik) -->
+                <div class="admin-box">
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 Developer API Keys</h3>
+                    <p style="color: var(--muted); font-size: 13px; margin-bottom: 10px;">Generate API keys to integrate AgentPay backend services securely into external applications.</p>
+                    <button onclick="generateApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate New API Key</button>
+                    
+                    <div style="margin-top: 15px;">
+                        <table style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>API Key</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apiKeyTableBody">
+                                <tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Embeddable Widget SDK Box -->
@@ -269,11 +290,27 @@
                 const data = await res.json();
                 if(data.success) {
                     activeNetwork = net;
-                    statusDiv.innerText = "✓ Settings saved successfully! Network: " + net;
-                    setTimeout(() => statusDiv.innerText = "", 4000);
+                    statusDiv.innerText = "✓ Settings saved successfully!";
+                    setTimeout(() => statusDiv.innerText = "", 3000);
                 }
             } catch(e) {
                 alert("Failed to save settings");
+            }
+        }
+
+        async function generateApiKey() {
+            const token = localStorage.getItem("admin_token");
+            try {
+                const res = await fetch("/api/admin/apikey/generate", {
+                    method: "POST",
+                    headers: { "Authorization": token }
+                });
+                const data = await res.json();
+                if(data.success) {
+                    loadAdminStats();
+                }
+            } catch(e) {
+                alert("Failed to generate API key");
             }
         }
 
@@ -305,7 +342,6 @@
             document.getElementById("status").innerText = "Preparing transaction (" + activeNetwork + ")...";
 
             try {
-                // Seçilen ağa göre Solana bağlantısını ayarla
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl(activeNetwork), 'confirmed');
                 const recipientPubKey = new solanaWeb3.PublicKey(RECIPIENT_WALLET);
 
@@ -368,6 +404,17 @@
                 if(data.network) {
                     document.getElementById("networkSelect").value = data.network;
                     activeNetwork = data.network;
+                }
+
+                // API Key Tablosunu Doldur
+                const apiKeyTbody = document.getElementById("apiKeyTableBody");
+                apiKeyTbody.innerHTML = "";
+                if(!data.api_keys || data.api_keys.length === 0) {
+                    apiKeyTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>`;
+                } else {
+                    data.api_keys.forEach(k => {
+                        apiKeyTbody.innerHTML += `<tr><td><code>${k.key}</code></td><td>${k.created_at}</td></tr>`;
+                    });
                 }
 
                 const tbody = document.getElementById("paymentTableBody");
