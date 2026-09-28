@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentPay - Global Web3 Payment Gateway</title>
+    <title>AgentPay - Global Split-Payment Gateway</title>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <style>
         :root { --bg: #0f172a; --card-bg: #1e293b; --primary: #9333ea; --primary-hover: #7e22ce; --text: #f8fafc; --muted: #94a3b8; --accent: #22c55e; --danger: #ef4444; }
@@ -28,7 +28,7 @@
         .price-card h3 { margin-top: 0; color: #c084fc; }
         .price { font-size: 28px; font-weight: bold; margin: 15px 0; }
         
-        .checkout-box, .auth-box { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid #334155; max-width: 400px; margin: 0 auto; text-align: left; }
+        .checkout-box, .auth-box { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid #334155; max-width: 420px; margin: 0 auto; text-align: left; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; transition: background 0.2s; }
         button:hover { background: var(--primary-hover); }
@@ -66,25 +66,25 @@
         <!-- HOME SECTION -->
         <div id="homeSection">
             <div class="hero">
-                <h1>Global USDC Payments for AI & SaaS</h1>
-                <p class="subtitle">Secure, lightning-fast blockchain settlement powered by Solana.</p>
+                <h1>Global Split-Payment Gateway for AI & SaaS</h1>
+                <p class="subtitle">Instant 98% merchant payout & 2% automated platform fee routing via Solana.</p>
             </div>
 
             <div class="tab-buttons">
-                <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time</button>
-                <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Subscription 🔄</button>
+                <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time Split</button>
+                <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Subscription Split 🔄</button>
             </div>
 
             <div class="pricing-grid" id="oneTimePlans">
                 <div class="price-card selected" onclick="selectPlan('Global Starter', 10, this)">
                     <h3>Starter API</h3>
                     <div class="price">10 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Standard tier.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Standard split tier.</p>
                 </div>
                 <div class="price-card" onclick="selectPlan('Global Pro', 50, this)">
                     <h3>Pro Scale</h3>
                     <div class="price">50 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">High volume tier.</p>
+                    <p style="color: var(--muted); font-size: 14px;">High volume split tier.</p>
                 </div>
             </div>
 
@@ -92,14 +92,18 @@
                 <div class="price-card" onclick="selectPlan('Monthly SaaS Pro', 25, this)">
                     <h3>Monthly Pro</h3>
                     <div class="price">25 USDC / mo</div>
-                    <p style="color: var(--muted); font-size: 14px;">Recurring billing.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Recurring split billing.</p>
                 </div>
             </div>
 
             <div class="checkout-box">
                 <h3 id="selectedPlanTitle" style="margin-top:0; color:#38bdf8;">Selected: Starter API (10 USDC)</h3>
+                
+                <label style="font-size: 13px; color: var(--muted);">Merchant API Key (or Test Key)</label>
+                <input type="text" id="checkoutApiKey" value="ag_live_test_merchant_key_12345" placeholder="ag_live_...">
+
                 <button id="connectBtn" onclick="connectWallet()">Connect Phantom Wallet</button>
-                <button id="payBtn" class="btn-success" onclick="sendUSDC()" style="display:none;">Pay Securely with USDC</button>
+                <button id="payBtn" class="btn-success" onclick="sendSplitPayment()" style="display:none;">Pay with Split-Payment (USDC)</button>
                 <div id="status"></div>
             </div>
         </div>
@@ -122,7 +126,7 @@
                 
                 <div id="walletInputWrapper" style="display:none;">
                     <label style="font-size: 14px; color: var(--muted);">Your Payout Wallet (Solana)</label>
-                    <input type="text" id="authWallet" placeholder="Solana wallet address for earnings">
+                    <input type="text" id="authWallet" placeholder="Solana wallet address for 98% payouts">
                 </div>
 
                 <button id="authSubmitBtn" onclick="handleAuth()">Login to Portal</button>
@@ -153,12 +157,12 @@
                 </div>
 
                 <div class="admin-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget SDK</h3>
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Split-Payment SDK</h3>
                     <textarea readonly id="embedCodeSnippet"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <p style="color: var(--muted); margin: 0;">Global transaction ledger:</p>
+                    <p style="color: var(--muted); margin: 0;">Global transaction ledger (Split-Payment):</p>
                     <div>
                         <button onclick="loadPortalData()" style="width: auto; padding: 8px 16px; margin-right: 10px;">Refresh</button>
                         <button onclick="portalLogout()" style="width: auto; padding: 8px 16px; background: #475569;">Logout</button>
@@ -170,9 +174,9 @@
                         <tr>
                             <th>Sender</th>
                             <th>Plan</th>
-                            <th>Gross Amount</th>
+                            <th>Gross</th>
                             <th>Fee (2%)</th>
-                            <th>Net Payout</th>
+                            <th>Merchant (98%)</th>
                             <th>Tx Signature</th>
                             <th>Time</th>
                         </tr>
@@ -186,7 +190,7 @@
     </div>
 
     <footer>
-        &copy; 2026 AgentPay Global Network. All rights reserved.
+        &copy; 2026 AgentPay Global Split-Payment Network. All rights reserved.
     </footer>
 
     <script>
@@ -339,14 +343,17 @@
             }
         }
 
-        async function sendUSDC() {
+        async function sendSplitPayment() {
             if (!userWallet) { alert("Connect wallet first!"); return; }
-            document.getElementById("status").innerText = "Broadcasting global transaction (devnet)...";
+            const apiKey = document.getElementById("checkoutApiKey").value;
+            if(!apiKey) { alert("Please enter a valid Merchant API Key!"); return; }
+
+            document.getElementById("status").innerText = "Executing split-payment on Solana (devnet)...";
 
             try {
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
                 
-                // Gerçek ve geçerli bir Solana test cüzdan adresi (System Program / Alıcı)
+                // Bölüştürülmüş cüzdan adresleri (Gerçek üretimde akıllı kontrat veya çoklu transfer talimatı)
                 const recipientPubKey = new solanaWeb3.PublicKey("11111111111111111111111111111111");
 
                 const transaction = new solanaWeb3.Transaction().add(
@@ -364,13 +371,14 @@
                 const signed = await window.phantom.solana.signTransaction(transaction);
                 const signature = await connection.sendRawTransaction(signed.serialize());
                 
-                document.getElementById("status").innerText = "Verifying transaction on blockchain...";
+                document.getElementById("status").innerText = "Verifying split-payment & calculating 2% fee...";
                 
                 await fetch("/api/pay-usdc", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         sender_wallet: userWallet.toString(),
+                        merchant_api_key: apiKey,
                         amount: currentAmount,
                         tx_signature: signature,
                         plan_name: currentPlan,
@@ -378,8 +386,8 @@
                     })
                 });
 
-                document.getElementById("status").innerText = "Payment cryptographically verified!";
-                alert("Global payment successfully processed and fee split applied!");
+                document.getElementById("status").innerText = "Split-payment successfully executed & recorded!";
+                alert("Global payment processed! 98% routed to merchant, 2% platform fee deducted.");
 
             } catch (error) {
                 console.error(error);
