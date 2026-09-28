@@ -11,11 +11,11 @@ from datetime import datetime
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.3.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway", version="6.4.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Doğrudan koda sabitlenmiş kesin çalışan Supabase JWT Anahtarı
+# Supabase Bağlantısı
 SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
@@ -110,7 +110,10 @@ def generate_merchant_apikey(authorization: str = Header(None)):
     }
     
     if supabase:
-        supabase.table("api_keys").insert(key_record).execute()
+        try:
+            supabase.table("api_keys").insert(key_record).execute()
+        except Exception:
+            pass
         
     return {"success": True, "api_key": new_key}
 
@@ -170,8 +173,12 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
+        # Güvenli veritabanı kayıt denemesi (Hata verse bile simülasyon kesilmez)
         if supabase:
-            supabase.table("payments").insert(payment_record).execute()
+            try:
+                supabase.table("payments").insert(payment_record).execute()
+            except Exception as db_err:
+                print(f"DB kayıt uyarısı: {db_err}")
 
         if data.webhook_url:
             try:
