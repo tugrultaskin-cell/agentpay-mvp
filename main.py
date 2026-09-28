@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway [Recurring Billing Enabled]", version="9.0.0")
+app = FastAPI(title="AgentPay Global Multi-Token Gateway [Full Enterprise Edition]", version="10.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -89,13 +89,13 @@ def get_developer_sdk():
             `;
 
             document.getElementById('agentPayBtn').onclick = async () => {
-                const mockSignature = 'TestSDK_Sub_Sig_' + Math.random().toString(36).substring(7);
+                const mockSignature = 'TestSDK_Enterprise_Sig_' + Math.random().toString(36).substring(7);
                 try {
                     const response = await fetch('https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            sender_wallet: 'SDK_Subscriber_Wallet_111',
+                            sender_wallet: 'SDK_Enterprise_Wallet_111',
                             merchant_api_key: this.apiKey,
                             amount: this.amount,
                             tx_signature: mockSignature,
@@ -193,6 +193,12 @@ def get_merchant_dashboard(authorization: str = Header(None)):
     
     platform_earnings = total_volume * PLATFORM_FEE_PERCENTAGE
     
+    # Görsel Analitik Dağılımları Hesaplama
+    token_breakdown = {}
+    for p in payments:
+        t_type = p.get("token_type", "USDC")
+        token_breakdown[t_type] = token_breakdown.get(t_type, 0.0) + p["amount"]
+
     return {
         "success": True,
         "email": "global.merchant@agentpay.io",
@@ -201,6 +207,10 @@ def get_merchant_dashboard(authorization: str = Header(None)):
         "total_volume": total_volume,
         "platform_earnings": platform_earnings,
         "total_transactions": len(payments),
+        "analytics": {
+            "token_distribution": token_breakdown,
+            "average_ticket_size": (total_volume / len(payments)) if payments else 0.0
+        },
         "payments": payments[::-1]
     }
 
@@ -218,7 +228,6 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
         platform_fee = data.amount * PLATFORM_FEE_PERCENTAGE
         merchant_net_payout = data.amount - platform_fee
 
-        # Abonelik ise sonraki yenileme tarihini hesapla (30 gün sonrasi)
         next_billing_date = None
         if data.is_subscription:
             next_billing_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
@@ -230,6 +239,7 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
             "platform_fee": platform_fee,
             "merchant_payout": merchant_net_payout,
             "tx_signature": data.tx_signature,
+            "token_type": data.token_type,
             "plan_name": f"{data.plan_name} ({data.token_type})",
             "type": "Recurring Subscription" if data.is_subscription else "One-Time Split",
             "next_billing_date": next_billing_date or "N/A",
@@ -263,7 +273,7 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
 
         return {
             "success": True,
-            "message": f"Global recurring subscription & split-payment processed successfully.",
+            "message": f"Global enterprise split-payment with visual analytics processed successfully.",
             "gross_amount": data.amount,
             "token_type": data.token_type,
             "is_subscription": data.is_subscription,
