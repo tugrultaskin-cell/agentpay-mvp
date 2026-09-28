@@ -20,10 +20,10 @@
                 <a href="#multichain" class="hover:text-emerald-400 transition">Multi-Chain</a>
                 <a href="#escrow" class="hover:text-emerald-400 transition">AI Escrow</a>
                 <a href="#pricing" class="hover:text-emerald-400 transition">Pricing (%1.5)</a>
-                <a href="/docs" class="hover:text-emerald-400 transition">API Docs</a>
+                <a href="#admin-login" class="text-emerald-400 font-semibold hover:underline">🔒 Secret Dashboard</a>
             </nav>
             <div class="flex items-center space-x-4">
-                <a href="/docs" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-semibold transition border border-slate-700">Dashboard</a>
+                <a href="#admin-login" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 px-4 py-2 rounded-lg text-sm font-semibold transition border border-emerald-500/30">Admin Login</a>
                 <a href="#sdk" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-emerald-500/20">Get Started</a>
             </div>
         </div>
@@ -48,7 +48,7 @@
         </div>
         <div class="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold mb-6">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>v14.0 Enterprise Edition — Multi-Chain & AI Escrow Live</span>
+            <span>v14.0 Enterprise Edition — Secure Private Stats Enabled</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight mb-6">
             The Autonomous Web3 Payment Gateway for <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">AI Agents & Global SaaS</span>.
@@ -61,8 +61,8 @@
                 <span>Explore SDK & Widgets</span>
                 <span>→</span>
             </a>
-            <a href="/docs" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 px-8 py-4 rounded-xl font-bold text-base transition flex items-center justify-center">
-                API Documentation
+            <a href="#admin-login" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 px-8 py-4 rounded-xl font-bold text-base transition flex items-center justify-center">
+                🔒 Access Secret Dashboard
             </a>
         </div>
     </section>
@@ -92,22 +92,76 @@
         </div>
     </section>
 
-    <!-- Pricing / Fee Model -->
-    <section id="pricing" class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-900 text-center">
-        <h2 class="text-3xl font-bold mb-3">Fair & Accessible Pricing</h2>
-        <p class="text-slate-400 text-sm mb-12">No setup costs. Only pay when transactions settle.</p>
-        <div class="max-w-md mx-auto bg-gradient-to-b from-slate-900 to-slate-900/60 border border-emerald-500/30 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-wider">Enterprise</div>
-            <h3 class="text-xl font-bold mb-2 text-slate-200">Global Scale Tier</h3>
-            <div class="text-5xl font-black text-emerald-400 my-6">1.5% <span class="text-lg font-normal text-slate-400">/ transaction</span></div>
-            <ul class="text-left text-sm text-slate-300 space-y-3 mb-8">
-                <li class="flex items-center space-x-2"><span>✅</span><span>Instant Split (98.5% Merchant / 1.5% Platform)</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Multi-Chain Support (Solana, Base, Arbitrum)</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>AI Agent Escrow & Daily Limits</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Pyth Network Oracle FX Rates</span></li>
-                <li class="flex items-center space-x-2"><span>✅</span><span>Global Bank Payout Off-Ramp</span></li>
-            </ul>
-            <a href="/docs" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">Start Accepting Payments</a>
+    <!-- Sadece Sana Özel Gizli Yönetim Paneli (Admin Login & Dashboard Section) -->
+    <section id="admin-login" class="max-w-4xl mx-auto px-6 py-16 border-t border-slate-900">
+        <div class="bg-slate-900/80 border border-emerald-500/40 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 bg-emerald-500 text-slate-950 text-xs font-black px-4 py-1 rounded-bl-xl uppercase tracking-wider">Restricted Area</div>
+            
+            <div id="login-container">
+                <div class="text-center mb-8">
+                    <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mx-auto mb-4">🔐</div>
+                    <h2 class="text-2xl font-bold text-slate-100">Private Owner Dashboard</h2>
+                    <p class="text-slate-400 text-sm mt-1">Enter credentials to view encrypted platform statistics.</p>
+                </div>
+                <form id="secretLoginForm" class="space-y-4 max-w-md mx-auto">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Username</label>
+                        <input type="text" id="secUser" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Username">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+                        <input type="password" id="secPass" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Password">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 mt-2">Unlock Private Stats</button>
+                    <p id="loginError" class="text-red-400 text-xs text-center mt-2 hidden">Invalid credentials. Access denied.</p>
+                </form>
+            </div>
+
+            <!-- Gizli İstatistik Paneli (Başarılı Giriş Sonrası Açılır) -->
+            <div id="dashboard-container" class="hidden space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-emerald-400">📊 Owner Statistics & Analytics</h2>
+                        <p class="text-xs text-slate-400">Welcome back, Tugrul. End-to-end encrypted private feed.</p>
+                    </div>
+                    <button id="logoutBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-semibold transition">Lock Dashboard</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
+                        <div class="text-xs font-medium text-slate-400 mb-1">Total Volume Processed</div>
+                        <div id="statVolume" class="text-3xl font-black text-emerald-400">$0.00</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
+                        <div class="text-xs font-medium text-slate-400 mb-1">Platform Earnings (1.5%)</div>
+                        <div id="statEarnings" class="text-3xl font-black text-teal-400">$0.00</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
+                        <div class="text-xs font-medium text-slate-400 mb-1">Total Transactions</div>
+                        <div id="statTxCount" class="text-3xl font-black text-cyan-400">0</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4">Recent Network Payments</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-400">
+                            <thead class="border-b border-slate-800 text-slate-500 uppercase">
+                                <tr>
+                                    <th class="pb-3">Timestamp</th>
+                                    <th class="pb-3">Token / Network</th>
+                                    <th class="pb-3">Plan</th>
+                                    <th class="pb-3">Amount</th>
+                                    <th class="pb-3">Fee (1.5%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTableBody">
+                                <tr><td colspan="5" class="py-4 text-center text-slate-500">Loading secure records...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -141,10 +195,11 @@
         <p>&copy; 2026 AgentPay Global Network. All rights reserved. Powered by Solana, Base, Arbitrum & Supabase.</p>
     </footer>
 
-    <!-- Widget Demo Script Execution -->
+    <!-- Secret Admin & Widget Script Execution -->
     <script src="/sdk.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
+            // Widget Demo
             if (window.AgentPayWidget) {
                 const demoWidget = new AgentPayWidget({
                     apiKey: 'ag_live_demo_key999',
@@ -156,6 +211,76 @@
                     onError: (err) => alert('Payment Error occurred')
                 });
                 demoWidget.render('agentpay-demo-container');
+            }
+
+            // Secret Admin Login Handler
+            const loginForm = document.getElementById('secretLoginForm');
+            const loginContainer = document.getElementById('login-container');
+            const dashContainer = document.getElementById('dashboard-container');
+            const loginError = document.getElementById('loginError');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            // Oturum kontrolü (Local storage)
+            if (localStorage.getItem('agentpay_owner_auth') === 'true') {
+                loginContainer.classList.add('hidden');
+                dashContainer.classList.remove('hidden');
+                fetchDashboardData();
+            }
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const u = document.getElementById('secUser').value;
+                const p = document.getElementById('secPass').value;
+
+                if (u === 'Tugrul35.' && p === '123580Tt.') {
+                    localStorage.setItem('agentpay_owner_auth', 'true');
+                    loginError.classList.add('hidden');
+                    loginContainer.classList.add('hidden');
+                    dashContainer.classList.remove('hidden');
+                    fetchDashboardData();
+                } else {
+                    loginError.classList.remove('hidden');
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('agentpay_owner_auth');
+                dashContainer.classList.add('hidden');
+                loginContainer.classList.remove('hidden');
+                document.getElementById('secUser').value = '';
+                document.getElementById('secPass').value = '';
+            });
+
+            async function fetchDashboardData() {
+                try {
+                    // Dahili merchant dashboard API verisini çekiyoruz
+                    const res = await fetch('/api/merchant/dashboard', {
+                        headers: { 'Authorization': 'Bearer owner_master_token_secure' }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        document.getElementById('statVolume').innerText = '$' + data.total_volume.toLocaleString();
+                        document.getElementById('statEarnings').innerText = '$' + data.platform_earnings.toLocaleString();
+                        document.getElementById('statTxCount').innerText = data.total_transactions;
+
+                        const tbody = document.getElementById('paymentsTableBody');
+                        if (data.payments && data.payments.length > 0) {
+                            tbody.innerHTML = data.payments.slice(0, 10).map(p => `
+                                <tr class="border-b border-slate-900/50">
+                                    <td class="py-3">${p.timestamp || 'N/A'}</td>
+                                    <td class="py-3"><span class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded">${p.token_type || 'USDC'}</span></td>
+                                    <td class="py-3 text-slate-300">${p.plan_name || 'Standard'}</td>
+                                    <td class="py-3 font-semibold text-slate-200">$${p.amount}</td>
+                                    <td class="py-3 text-teal-400">$${p.platform_fee ? p.platform_fee.toFixed(2) : '0.00'}</td>
+                                </tr>
+                            `).join('');
+                        } else {
+                            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500">No transactions recorded yet.</td></tr>`;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Dashboard data fetch error:', err);
+                }
             }
         });
     </script>
