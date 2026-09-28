@@ -32,6 +32,11 @@
         .btn-success:hover { background: #16a34a; }
         #status { margin-top: 15px; font-size: 14px; color: #38bdf8; text-align: center; word-break: break-all; }
         
+        /* Analytics Grid in Admin */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
+
         #dashboardSection { display: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
@@ -101,12 +106,28 @@
                 <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Protected Data Table -->
+            <!-- Protected Data & Stats -->
             <div id="adminContent" style="display: none;">
-                <p style="color: var(--muted);">Real-time log of all USDC transactions processed through the gateway:</p>
-                <button onclick="loadPayments()" style="width: auto; padding: 8px 16px; margin-bottom: 15px;">Refresh List</button>
-                <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; margin-bottom: 15px; background: #475569; float: right;">Logout</button>
-                <div style="clear: both;"></div>
+                <!-- Analytics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div style="color: var(--muted); font-size: 14px;">Total Revenue</div>
+                        <div class="stat-value" id="totalRevenue">0 USDC</div>
+                    </div>
+                    <div class="stat-card">
+                        <div style="color: var(--muted); font-size: 14px;">Total Transactions</div>
+                        <div class="stat-value" id="totalTx">0</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <p style="color: var(--muted); margin: 0;">Real-time transaction logs:</p>
+                    <div>
+                        <button onclick="loadAdminStats()" style="width: auto; padding: 8px 16px; margin-right: 10px;">Refresh</button>
+                        <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #475569;">Logout</button>
+                    </div>
+                </div>
+
                 <table>
                     <thead>
                         <tr>
@@ -133,7 +154,7 @@
         let userWallet = null;
         let currentPlan = "Starter Plan";
         let currentAmount = 5;
-        const RECIPIENT_WALLET = "CQcf...TD4q"; // Şirket cüzdan adresin
+        const RECIPIENT_WALLET = "CQcf...TD4q";
 
         function selectPlan(name, amount, element) {
             document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
@@ -159,7 +180,7 @@
             if (token) {
                 document.getElementById("loginBox").style.display = "none";
                 document.getElementById("adminContent").style.display = "block";
-                loadPayments();
+                loadAdminStats();
             } else {
                 document.getElementById("loginBox").style.display = "block";
                 document.getElementById("adminContent").style.display = "none";
@@ -264,10 +285,10 @@
             }
         }
 
-        async function loadPayments() {
+        async function loadAdminStats() {
             try {
                 const token = localStorage.getItem("admin_token");
-                const res = await fetch("/api/payments", {
+                const res = await fetch("/api/admin/stats", {
                     headers: { "Authorization": token }
                 });
                 
@@ -277,6 +298,11 @@
                 }
 
                 const data = await res.json();
+                
+                // İstatistik kartlarını güncelle
+                document.getElementById("totalRevenue").innerText = data.total_revenue + " USDC";
+                document.getElementById("totalTx").innerText = data.total_transactions;
+
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
 
@@ -296,7 +322,7 @@
                     tbody.innerHTML += row;
                 });
             } catch(e) {
-                console.error("Could not load payments", e);
+                console.error("Could not load stats", e);
             }
         }
     </script>

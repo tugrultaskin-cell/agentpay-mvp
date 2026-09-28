@@ -8,15 +8,15 @@ import os
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay MVP", version="1.2.0")
+app = FastAPI(title="AgentPay MVP", version="1.3.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
-# BURAYA KENDI YÖNETİCİ BİLGİLERİNİ YAZABİLİRSİN
-ADMIN_USERNAME = "Tugrul35"
-ADMIN_PASSWORD = "123580Tt."
+# Yönetici bilgileri
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "gizlisifre123"
 
 PAYMENT_DATABASE = []
 
@@ -69,8 +69,17 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/payments")
-def get_payments(authorization: str = Header(None)):
+@app.get("/api/admin/stats")
+def get_admin_stats(authorization: str = Header(None)):
     if not authorization or authorization != "agentpay_secure_admin_token_2026":
         raise HTTPException(status_code=403, detail="Unauthorized access.")
-    return {"success": True, "payments": PAYMENT_DATABASE[::-1]}
+    
+    total_revenue = sum(p["amount"] for p in PAYMENT_DATABASE)
+    total_transactions = len(PAYMENT_DATABASE)
+    
+    return {
+        "success": True,
+        "total_revenue": total_revenue,
+        "total_transactions": total_transactions,
+        "payments": PAYMENT_DATABASE[::-1]
+    }
