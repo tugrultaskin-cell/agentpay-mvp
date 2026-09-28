@@ -9,18 +9,19 @@ import httpx
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay MVP", version="1.4.0")
+app = FastAPI(title="AgentPay Mainnet Ready", version="1.6.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+USDC_MINT_DEVNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # Gerçek USDC Mint adresi (Solana Mainnet)
 
 # Yönetici bilgileri
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "gizlisifre123"
 
 PAYMENT_DATABASE = []
-WEBHOOK_SETTINGS = {"url": ""}  # Kayıtlı webhook URL'si
+SETTINGS = {"webhook_url": "", "network": "devnet"} # devnet veya mainnet
 
 class PaymentRequest(BaseModel):
     sender_wallet: str
@@ -32,15 +33,16 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-class WebhookRequest(BaseModel):
-    url: str
+class SettingsRequest(BaseModel):
+    webhook_url: str
+    network: str
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     if os.path.exists("index.html"):
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
-    return {"status": "online", "service": "AgentPay MVP API", "network": "Solana"}
+    return {"status": "online", "service": "AgentPay API", "network": SETTINGS["network"]}
 
 @app.post("/api/admin/login")
 def admin_login(data: LoginRequest):
@@ -48,18 +50,30 @@ def admin_login(data: LoginRequest):
         return {"success": True, "token": "agentpay_secure_admin_token_2026"}
     raise HTTPException(status_code=401, detail="Geçersiz kullanıcı adı veya şifre.")
 
-@app.post("/api/admin/webhook")
-def save_webhook(data: WebhookRequest, authorization: str = Header(None)):
+@app.post("/api/admin/settings")
+def save_settings(data: SettingsRequest, authorization: str = Header(None)):
     if not authorization or authorization != "agentpay_secure_admin_token_2026":
         raise HTTPException(status_code=403, detail="Unauthorized access.")
-    WEBHOOK_SETTINGS["url"] = data.url
-    return {"success": True, "message": "Webhook URL başarıyla güncellendi."}
+    SETTINGS["webhook_url"] = data.webhook_url
+    SETTINGS["network"] = data.network
+    return {"success": True, "message": "Ayarlar başarıyla güncellendi."}
 
-@app.get("/api/admin/webhook")
-def get_webhook(authorization: str = Header(None)):
+@app.get("/api/admin/stats")
+def get_admin_stats(authorization: str = Header(None)):
     if not authorization or authorization != "agentpay_secure_admin_token_2026":
         raise HTTPException(status_code=403, detail="Unauthorized access.")
-    return {"success": True, "url": WEBHOOK_SETTINGS["url"]}
+    
+    total_revenue = sum(p["amount"] for p in PAYMENT_DATABASE)
+    total_transactions = len(PAYMENT_DATABASE)
+    
+    return {
+        "success": True,
+        "total_revenue": total_revenue,
+        "total_transactions": total_transactions,
+        "webhook_url": SETTINGS["webhook_url"],
+        "network": SETTINGS["network"],
+        "payments": PAYMENT_DATABASE[::-1]
+    }
 
 @app.post("/api/pay-usdc")
 @limiter.limit("5/minute")
@@ -77,11 +91,10 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
         }
         PAYMENT_DATABASE.append(payment_record)
 
-        # Webhook tanımlıysa hedef adrese arka planda otomatik bildirim gönder
-        if WEBHOOK_SETTINGS["url"]:
+        if SETTINGS["webhook_url"]:
             try:
                 with httpx.Client(timeout=5.0) as client:
-                    client.post(WEBHOOK_SETTINGS["url"], json=payment_record)
+                    client.post(SETTINGS["webhook_url"], json=payment_record)
             except Exception as wh_err:
                 print(f"Webhook tetikleme hatası: {wh_err}")
 
@@ -94,19 +107,3 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/admin/stats")
-def get_admin_stats(authorization: str = Header(None)):
-    if not authorization or authorization != "agentpay_secure_admin_token_2026":
-        raise HTTPException(status_code=403, detail="Unauthorized access.")
-    
-    total_revenue = sum(p["amount"] for p in PAYMENT_DATABASE)
-    total_transactions = len(PAYMENT_DATABASE)
-    
-    return {
-        "success": True,
-        "total_revenue": total_revenue,
-        "total_transactions": total_transactions,
-        "webhook_url": WEBHOOK_SETTINGS["url"],
-        "payments": PAYMENT_DATABASE[::-1]
-    }

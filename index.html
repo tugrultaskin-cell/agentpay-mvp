@@ -25,7 +25,7 @@
         .price { font-size: 28px; font-weight: bold; margin: 15px 0; }
         
         .checkout-box, .login-box { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid #334155; max-width: 400px; margin: 0 auto; text-align: left; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
         button { background: var(--primary); color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; transition: background 0.2s; }
         button:hover { background: var(--primary-hover); }
         .btn-success { background: var(--accent); }
@@ -37,8 +37,9 @@
         .stat-card { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
 
-        /* Webhook Box */
-        .webhook-box { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        /* Boxes in Admin */
+        .admin-box { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        textarea { width: 100%; height: 70px; background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; box-sizing: border-box; resize: none; margin-top: 5px; }
 
         #dashboardSection { display: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
@@ -109,7 +110,7 @@
                 <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Protected Data, Stats & Webhook -->
+            <!-- Protected Data, Stats, Webhook & Mainnet Settings -->
             <div id="adminContent" style="display: none;">
                 <!-- Analytics Cards -->
                 <div class="stats-grid">
@@ -123,15 +124,27 @@
                     </div>
                 </div>
 
-                <!-- Webhook Configuration Box -->
-                <div class="webhook-box">
-                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔗 Webhook Notification URL</h3>
-                    <p style="color: var(--muted); font-size: 13px; margin-bottom: 10px;">When a payment is successfully completed, AgentPay will send a POST request to this endpoint automatically.</p>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="webhookInput" placeholder="https://your-saas-app.com/api/webhook" style="margin: 0; flex: 1;">
-                        <button onclick="saveWebhook()" style="width: auto; margin: 0; padding: 0 20px;">Save URL</button>
-                    </div>
-                    <div id="webhookStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
+                <!-- Settings Box: Network & Webhook (Adım 4) -->
+                <div class="admin-box">
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">⚙️ Gateway Settings (Mainnet / Devnet & Webhook)</h3>
+                    
+                    <label style="font-size: 13px; color: var(--muted);">Solana Network Mode</label>
+                    <select id="networkSelect">
+                        <option value="devnet">Devnet (Test Mode)</option>
+                        <option value="mainnet-beta">Mainnet (Live / Real USDC)</option>
+                    </select>
+
+                    <label style="font-size: 13px; color: var(--muted); display: block; margin-top: 10px;">Webhook Notification URL</label>
+                    <input type="text" id="webhookInput" placeholder="https://your-saas-app.com/api/webhook" style="margin-top: 5px;">
+                    
+                    <button onclick="saveSettings()" style="margin-top: 10px;">Save Settings</button>
+                    <div id="settingsStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
+                </div>
+
+                <!-- Embeddable Widget SDK Box -->
+                <div class="admin-box">
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget (SDK)</h3>
+                    <textarea readonly id="embedCodeSnippet"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -168,7 +181,14 @@
         let userWallet = null;
         let currentPlan = "Starter Plan";
         let currentAmount = 5;
+        let activeNetwork = "devnet";
         const RECIPIENT_WALLET = "CQcf...TD4q";
+
+        window.onload = function() {
+            const currentDomain = window.location.origin;
+            const snippet = `<iframe src="${currentDomain}" width="100%" height="650px" style="border:none; border-radius:16px;"></iframe>`;
+            document.getElementById("embedCodeSnippet").value = snippet;
+        };
 
         function selectPlan(name, amount, element) {
             document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
@@ -231,27 +251,29 @@
             checkLoginStatus();
         }
 
-        async function saveWebhook() {
+        async function saveSettings() {
             const token = localStorage.getItem("admin_token");
             const url = document.getElementById("webhookInput").value;
-            const statusDiv = document.getElementById("webhookStatus");
+            const net = document.getElementById("networkSelect").value;
+            const statusDiv = document.getElementById("settingsStatus");
 
             try {
-                const res = await fetch("/api/admin/webhook", {
+                const res = await fetch("/api/admin/settings", {
                     method: "POST",
                     headers: { 
                         "Content-Type": "application/json",
                         "Authorization": token 
                     },
-                    body: JSON.stringify({ url: url })
+                    body: JSON.stringify({ webhook_url: url, network: net })
                 });
                 const data = await res.json();
                 if(data.success) {
-                    statusDiv.innerText = "✓ Webhook URL saved successfully!";
-                    setTimeout(() => statusDiv.innerText = "", 3000);
+                    activeNetwork = net;
+                    statusDiv.innerText = "✓ Settings saved successfully! Network: " + net;
+                    setTimeout(() => statusDiv.innerText = "", 4000);
                 }
             } catch(e) {
-                alert("Failed to save webhook URL");
+                alert("Failed to save settings");
             }
         }
 
@@ -280,10 +302,11 @@
                 return;
             }
 
-            document.getElementById("status").innerText = "Preparing transaction...";
+            document.getElementById("status").innerText = "Preparing transaction (" + activeNetwork + ")...";
 
             try {
-                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
+                // Seçilen ağa göre Solana bağlantısını ayarla
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl(activeNetwork), 'confirmed');
                 const recipientPubKey = new solanaWeb3.PublicKey(RECIPIENT_WALLET);
 
                 const transaction = new solanaWeb3.Transaction().add(
@@ -342,6 +365,10 @@
                 if(data.webhook_url) {
                     document.getElementById("webhookInput").value = data.webhook_url;
                 }
+                if(data.network) {
+                    document.getElementById("networkSelect").value = data.network;
+                    activeNetwork = data.network;
+                }
 
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
@@ -352,11 +379,12 @@
                 }
 
                 data.payments.forEach(p => {
+                    const explorerCluster = activeNetwork === 'mainnet-beta' ? '' : '?cluster=devnet';
                     const row = `<tr>
                         <td>${p.sender_wallet.slice(0, 6)}...${p.sender_wallet.slice(-4)}</td>
                         <td>${p.plan_name}</td>
                         <td>${p.amount} USDC</td>
-                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}?cluster=devnet" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
+                        <td><a href="https://explorer.solana.com/tx/${p.tx_signature}${explorerCluster}" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
                         <td>${p.timestamp}</td>
                     </tr>`;
                     tbody.innerHTML += row;
