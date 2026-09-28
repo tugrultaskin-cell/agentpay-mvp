@@ -13,11 +13,15 @@
         nav a { color: var(--muted); text-decoration: none; margin-left: 20px; font-weight: 500; cursor: pointer; }
         nav a:hover { color: var(--text); }
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; flex: 1; width: 100%; box-sizing: border-box; }
-        .hero { text-align: center; margin-bottom: 40px; }
+        .hero { text-align: center; margin-bottom: 30px; }
         h1 { font-size: 38px; margin-bottom: 10px; background: linear-gradient(to right, #c084fc, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         p.subtitle { color: var(--muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
         
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .tab-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .tab-btn { background: #1e293b; border: 1px solid #334155; color: var(--muted); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .price-card { background: var(--card-bg); border: 1px solid #334155; border-radius: 16px; padding: 25px; text-align: center; transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
         .price-card:hover { transform: translateY(-5px); border-color: #c084fc; }
         .price-card.selected { border-color: #c084fc; background: #26334d; }
@@ -37,12 +41,11 @@
         .stat-card { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
 
-        /* Boxes in Admin */
         .admin-box { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
         textarea { width: 100%; height: 70px; background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; box-sizing: border-box; resize: none; margin-top: 5px; }
 
         #dashboardSection { display: none; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
         th { background: #1b263b; color: #c084fc; }
         
@@ -52,10 +55,10 @@
 <body>
 
     <header>
-        <div class="logo" onclick="switchTab('home')">⚡ AgentPay</div>
+        <div class="logo" onclick="switchMainTab('home')">⚡ AgentPay</div>
         <nav>
-            <a onclick="switchTab('home')">Pricing & Pay</a>
-            <a onclick="switchTab('dashboard')">Admin Dashboard</a>
+            <a onclick="switchMainTab('home')">Pricing & Pay</a>
+            <a onclick="switchMainTab('dashboard')">Admin Dashboard</a>
         </nav>
     </header>
 
@@ -64,24 +67,40 @@
         <div id="homeSection">
             <div class="hero">
                 <h1>Instant Payments for AI & SaaS</h1>
-                <p class="subtitle">Select your plan and securely checkout instantly via the Solana network using USDC.</p>
+                <p class="subtitle">Choose between one-time checkout or monthly recurring subscriptions via Solana using USDC.</p>
             </div>
 
-            <div class="pricing-grid">
+            <!-- Tip Seçim Butonları (Tek Seferlik vs Abonelik) -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="btnOneTime" onclick="setPaymentType('onetime')">One-Time Payments</button>
+                <button class="tab-btn" id="btnSub" onclick="setPaymentType('subscription')">Monthly Subscriptions 🔄</button>
+            </div>
+
+            <!-- Tek Seferlik Paketler -->
+            <div class="pricing-grid" id="oneTimePlans">
                 <div class="price-card selected" onclick="selectPlan('Starter Plan', 5, this)">
-                    <h3>Starter</h3>
+                    <h3>Starter (One-Time)</h3>
                     <div class="price">5 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Ideal for indie developers and quick testing.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Ideal for quick testing.</p>
                 </div>
                 <div class="price-card" onclick="selectPlan('Pro SaaS Plan', 25, this)">
-                    <h3>Pro SaaS</h3>
+                    <h3>Pro SaaS (One-Time)</h3>
                     <div class="price">25 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Perfect for active applications and tools.</p>
+                    <p style="color: var(--muted); font-size: 14px;">Perfect for active tools.</p>
                 </div>
-                <div class="price-card" onclick="selectPlan('Enterprise Plan', 100, this)">
-                    <h3>Enterprise</h3>
-                    <div class="price">100 USDC</div>
-                    <p style="color: var(--muted); font-size: 14px;">Built for high-volume AI agent workflows.</p>
+            </div>
+
+            <!-- Abonelik Paketleri (Başlangıçta gizli) -->
+            <div class="pricing-grid" id="subPlans" style="display: none;">
+                <div class="price-card" onclick="selectPlan('Monthly Starter Sub', 10, this)">
+                    <h3>Starter Sub</h3>
+                    <div class="price">10 USDC / mo</div>
+                    <p style="color: var(--muted); font-size: 14px;">Billed monthly, cancel anytime.</p>
+                </div>
+                <div class="price-card" onclick="selectPlan('Monthly Pro Sub', 40, this)">
+                    <h3>Pro SaaS Sub</h3>
+                    <div class="price">40 USDC / mo</div>
+                    <p style="color: var(--muted); font-size: 14px;">Unlimited AI agent workflow access.</p>
                 </div>
             </div>
 
@@ -99,7 +118,6 @@
         <div id="dashboardSection">
             <h2>Payment Management Dashboard</h2>
             
-            <!-- Login Form -->
             <div id="loginBox" class="login-box">
                 <h3 style="margin-top:0; color:#c084fc;">Admin Login</h3>
                 <label style="font-size: 14px; color: var(--muted);">Username</label>
@@ -110,7 +128,6 @@
                 <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Protected Data, Stats, Webhook, API Keys & Settings -->
             <div id="adminContent" style="display: none;">
                 <!-- Analytics Cards -->
                 <div class="stats-grid">
@@ -122,12 +139,15 @@
                         <div style="color: var(--muted); font-size: 14px;">Total Transactions</div>
                         <div class="stat-value" id="totalTx">0</div>
                     </div>
+                    <div class="stat-card">
+                        <div style="color: var(--muted); font-size: 14px;">Active Subscriptions</div>
+                        <div class="stat-value" id="totalSubs">0</div>
+                    </div>
                 </div>
 
-                <!-- Settings Box: Network & Webhook -->
+                <!-- Settings Box -->
                 <div class="admin-box">
                     <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">⚙️ Gateway Settings</h3>
-                    
                     <label style="font-size: 13px; color: var(--muted);">Solana Network Mode</label>
                     <select id="networkSelect">
                         <option value="devnet">Devnet (Test Mode)</option>
@@ -141,28 +161,30 @@
                     <div id="settingsStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
                 </div>
 
-                <!-- API Key Management Box (Yepyeni Özellik) -->
+                <!-- API Keys Box -->
                 <div class="admin-box">
                     <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔑 Developer API Keys</h3>
-                    <p style="color: var(--muted); font-size: 13px; margin-bottom: 10px;">Generate API keys to integrate AgentPay backend services securely into external applications.</p>
                     <button onclick="generateApiKey()" style="width: auto; padding: 10px 20px; background: #2563eb;">+ Generate New API Key</button>
-                    
-                    <div style="margin-top: 15px;">
-                        <table style="margin-top: 0;">
-                            <thead>
-                                <tr>
-                                    <th>API Key</th>
-                                    <th>Created At</th>
-                                </tr>
-                            </thead>
-                            <tbody id="apiKeyTableBody">
-                                <tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table style="margin-top: 10px;">
+                        <thead><tr><th>API Key</th><th>Created At</th></tr></thead>
+                        <tbody id="apiKeyTableBody">
+                            <tr><td colspan="2" style="text-align: center; color: var(--muted);">No API keys generated yet.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Embeddable Widget SDK Box -->
+                <!-- Active Subscriptions Box -->
+                <div class="admin-box">
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔄 Active Subscriptions</h3>
+                    <table>
+                        <thead><tr><th>Subscriber Wallet</th><th>Plan</th><th>Monthly Amount</th><th>Status</th><th>Started At</th></tr></thead>
+                        <tbody id="subTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--muted);">No active subscriptions yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Embed Widget Box -->
                 <div class="admin-box">
                     <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🧩 Embeddable Payment Widget (SDK)</h3>
                     <textarea readonly id="embedCodeSnippet"></textarea>
@@ -181,13 +203,14 @@
                         <tr>
                             <th>Sender Wallet</th>
                             <th>Plan</th>
+                            <th>Type</th>
                             <th>Amount</th>
                             <th>Transaction Hash (TX)</th>
                             <th>Timestamp</th>
                         </tr>
                     </thead>
                     <tbody id="paymentTableBody">
-                        <tr><td colspan="5" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>
+                        <tr><td colspan="6" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -202,6 +225,7 @@
         let userWallet = null;
         let currentPlan = "Starter Plan";
         let currentAmount = 5;
+        let isSubMode = false;
         let activeNetwork = "devnet";
         const RECIPIENT_WALLET = "CQcf...TD4q";
 
@@ -211,15 +235,33 @@
             document.getElementById("embedCodeSnippet").value = snippet;
         };
 
+        function setPaymentType(type) {
+            if(type === 'onetime') {
+                isSubMode = false;
+                document.getElementById("btnOneTime").classList.add("active");
+                document.getElementById("btnSub").classList.remove("active");
+                document.getElementById("oneTimePlans").style.display = "grid";
+                document.getElementById("subPlans").style.display = "none";
+                selectPlan('Starter Plan', 5, document.querySelector('#oneTimePlans .price-card'));
+            } else {
+                isSubMode = true;
+                document.getElementById("btnSub").classList.add("active");
+                document.getElementById("btnOneTime").classList.remove("active");
+                document.getElementById("oneTimePlans").style.display = "none";
+                document.getElementById("subPlans").style.display = "grid";
+                selectPlan('Monthly Starter Sub', 10, document.querySelector('#subPlans .price-card'));
+            }
+        }
+
         function selectPlan(name, amount, element) {
             document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
             element.classList.add('selected');
             currentPlan = name;
             currentAmount = amount;
-            document.getElementById("selectedPlanTitle").innerText = `Selected: ${name} (${amount} USDC)`;
+            document.getElementById("selectedPlanTitle").innerText = `Selected: ${name} (${amount} USDC${isSubMode ? '/mo' : ''})`;
         }
 
-        function switchTab(tab) {
+        function switchMainTab(tab) {
             if(tab === 'home') {
                 document.getElementById("homeSection").style.display = "block";
                 document.getElementById("dashboardSection").style.display = "none";
@@ -281,10 +323,7 @@
             try {
                 const res = await fetch("/api/admin/settings", {
                     method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Authorization": token 
-                    },
+                    headers: { "Content-Type": "application/json", "Authorization": token },
                     body: JSON.stringify({ webhook_url: url, network: net })
                 });
                 const data = await res.json();
@@ -293,9 +332,7 @@
                     statusDiv.innerText = "✓ Settings saved successfully!";
                     setTimeout(() => statusDiv.innerText = "", 3000);
                 }
-            } catch(e) {
-                alert("Failed to save settings");
-            }
+            } catch(e) { alert("Failed to save settings"); }
         }
 
         async function generateApiKey() {
@@ -306,12 +343,8 @@
                     headers: { "Authorization": token }
                 });
                 const data = await res.json();
-                if(data.success) {
-                    loadAdminStats();
-                }
-            } catch(e) {
-                alert("Failed to generate API key");
-            }
+                if(data.success) { loadAdminStats(); }
+            } catch(e) { alert("Failed to generate API key"); }
         }
 
         async function connectWallet() {
@@ -324,7 +357,6 @@
                     document.getElementById("connectBtn").style.display = "none";
                     document.getElementById("payBtn").style.display = "block";
                 } catch (err) {
-                    console.error(err);
                     document.getElementById("status").innerText = "Wallet connection rejected.";
                 }
             } else {
@@ -334,10 +366,7 @@
         }
 
         async function sendUSDC() {
-            if (!userWallet) {
-                alert("Please connect your wallet first!");
-                return;
-            }
+            if (!userWallet) { alert("Please connect your wallet first!"); return; }
 
             document.getElementById("status").innerText = "Preparing transaction (" + activeNetwork + ")...";
 
@@ -369,12 +398,13 @@
                         sender_wallet: userWallet.toString(),
                         amount: currentAmount,
                         tx_signature: signature,
-                        plan_name: currentPlan
+                        plan_name: currentPlan,
+                        is_subscription: isSubMode
                     })
                 });
 
                 document.getElementById("status").innerText = "Payment completed successfully!";
-                alert("Payment successfully verified and recorded!");
+                alert("Subscription/Payment successfully verified and recorded!");
 
             } catch (error) {
                 console.error(error);
@@ -389,24 +419,20 @@
                     headers: { "Authorization": token }
                 });
                 
-                if (!res.ok) {
-                    adminLogout();
-                    return;
-                }
+                if (!res.ok) { adminLogout(); return; }
 
                 const data = await res.json();
                 
                 document.getElementById("totalRevenue").innerText = data.total_revenue + " USDC";
                 document.getElementById("totalTx").innerText = data.total_transactions;
-                if(data.webhook_url) {
-                    document.getElementById("webhookInput").value = data.webhook_url;
-                }
+                document.getElementById("totalSubs").innerText = data.total_subscriptions;
+                if(data.webhook_url) { document.getElementById("webhookInput").value = data.webhook_url; }
                 if(data.network) {
                     document.getElementById("networkSelect").value = data.network;
                     activeNetwork = data.network;
                 }
 
-                // API Key Tablosunu Doldur
+                // API Keys Tablosu
                 const apiKeyTbody = document.getElementById("apiKeyTableBody");
                 apiKeyTbody.innerHTML = "";
                 if(!data.api_keys || data.api_keys.length === 0) {
@@ -417,11 +443,23 @@
                     });
                 }
 
+                // Subscriptions Tablosu
+                const subTbody = document.getElementById("subTableBody");
+                subTbody.innerHTML = "";
+                if(!data.subscriptions || data.subscriptions.length === 0) {
+                    subTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted);">No active subscriptions yet.</td></tr>`;
+                } else {
+                    data.subscriptions.forEach(s => {
+                        subTbody.innerHTML += `<tr><td>${s.subscriber_wallet.slice(0, 6)}...${s.subscriber_wallet.slice(-4)}</td><td>${s.plan_name}</td><td>${s.monthly_amount} USDC</td><td><span style="color:var(--accent)">● ${s.status}</span></td><td>${s.started_at}</td></tr>`;
+                    });
+                }
+
+                // Transactions Tablosu
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
 
                 if(data.payments.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted);">No payment records found yet.</td></tr>`;
                     return;
                 }
 
@@ -430,15 +468,14 @@
                     const row = `<tr>
                         <td>${p.sender_wallet.slice(0, 6)}...${p.sender_wallet.slice(-4)}</td>
                         <td>${p.plan_name}</td>
+                        <td><span style="color: ${p.type === 'Abonelik' ? '#c084fc' : '#38bdf8'}">${p.type}</span></td>
                         <td>${p.amount} USDC</td>
                         <td><a href="https://explorer.solana.com/tx/${p.tx_signature}${explorerCluster}" target="_blank" style="color: #38bdf8;">${p.tx_signature.slice(0, 8)}...</a></td>
                         <td>${p.timestamp}</td>
                     </tr>`;
                     tbody.innerHTML += row;
                 });
-            } catch(e) {
-                console.error("Could not load stats", e);
-            }
+            } catch(e) { console.error("Could not load stats", e); }
         }
     </script>
 </body>

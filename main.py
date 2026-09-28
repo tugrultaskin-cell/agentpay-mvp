@@ -10,23 +10,24 @@ import secrets
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Developer Ecosystem", version="1.7.0")
+app = FastAPI(title="AgentPay Subscription Engine", version="1.8.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Yönetici bilgileri
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "gizlisifre123"
 
 PAYMENT_DATABASE = []
+SUBSCRIPTIONS_DATABASE = [] # Aktif abonelikler
 SETTINGS = {"webhook_url": "", "network": "devnet"}
-API_KEYS = [] # Geliştirici API anahtarları listesi
+API_KEYS = []
 
 class PaymentRequest(BaseModel):
     sender_wallet: str
     amount: float
     tx_signature: str
     plan_name: str = "Özel Ödeme"
+    is_subscription: bool = False
 
 class LoginRequest(BaseModel):
     username: str
@@ -77,14 +78,17 @@ def get_admin_stats(authorization: str = Header(None)):
     
     total_revenue = sum(p["amount"] for p in PAYMENT_DATABASE)
     total_transactions = len(PAYMENT_DATABASE)
+    total_subs = len(SUBSCRIPTIONS_DATABASE)
     
     return {
         "success": True,
         "total_revenue": total_revenue,
         "total_transactions": total_transactions,
+        "total_subscriptions": total_subs,
         "webhook_url": SETTINGS["webhook_url"],
         "network": SETTINGS["network"],
         "api_keys": API_KEYS,
+        "subscriptions": SUBSCRIPTIONS_DATABASE[::-1],
         "payments": PAYMENT_DATABASE[::-1]
     }
 
@@ -100,9 +104,19 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
             "amount": data.amount,
             "tx_signature": data.tx_signature,
             "plan_name": data.plan_name,
+            "type": "Abonelik" if data.is_subscription else "Tek Seferlik",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         PAYMENT_DATABASE.append(payment_record)
+
+        if data.is_subscription:
+            SUBSCRIPTIONS_DATABASE.append({
+                "subscriber_wallet": data.sender_wallet,
+                "plan_name": data.plan_name,
+                "monthly_amount": data.amount,
+                "status": "Aktif",
+                "started_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
 
         if SETTINGS["webhook_url"]:
             try:
@@ -113,7 +127,7 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
 
         return {
             "success": True,
-            "message": "Payment verified, recorded and webhook triggered.",
+            "message": "Payment verified and recorded successfully.",
             "token": "USDC",
             "amount": data.amount,
             "tx_signature": data.tx_signature
