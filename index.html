@@ -58,6 +58,7 @@
         <nav>
             <a onclick="switchMainTab('home')">Demo Checkout</a>
             <a onclick="switchMainTab('dashboard')">Merchant Dashboard</a>
+            <a href="/docs" target="_blank">Docs 📖</a>
         </nav>
     </header>
 
@@ -276,7 +277,7 @@
         async function handleAuth() {
             const email = document.getElementById("authEmail").value;
             const password = document.getElementById("authPassword").value;
-            const payout_wallet = document.getElementById("authWallet").value || "CQcf...TD4q";
+            const payout_wallet = document.getElementById("authWallet").value || "11111111111111111111111111111111";
             const errDiv = document.getElementById("authError");
 
             const endpoint = isRegisterMode ? "/api/auth/register" : "/api/auth/login";
@@ -344,7 +345,9 @@
 
             try {
                 const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
-                const recipientPubKey = new solanaWeb3.PublicKey("CQcf...TD4q");
+                
+                // Gerçek ve geçerli bir Solana test cüzdan adresi (System Program / Alıcı)
+                const recipientPubKey = new solanaWeb3.PublicKey("11111111111111111111111111111111");
 
                 const transaction = new solanaWeb3.Transaction().add(
                     solanaWeb3.SystemProgram.transfer({
