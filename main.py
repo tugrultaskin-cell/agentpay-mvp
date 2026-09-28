@@ -11,13 +11,13 @@ from datetime import datetime
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Split-Payment Gateway", version="4.0.0")
+app = FastAPI(title="AgentPay Global Split-Payment Gateway", version="4.3.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Supabase Bulut Veritabanı Bağlantısı
+# Supabase Bulut Veritabanı Bağlantı Bilgileri (Doğrulanmış Doğru JWT Key)
 SUPABASE_URL = "https://bcpbkrtncavxabyrlecl.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eAbyJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjcGJrcnRuY2F2eGFieXJsZWNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1NjE4OTMsImV4cCI6MjEwNjEzNzg5M30.7WrvBmI0TRKXdoaOmZNHJRoq-0XMLsl0KqDoO-cQ-Y4"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -25,8 +25,7 @@ except Exception as e:
     print(f"Supabase bağlantı hatası: {e}")
     supabase = None
 
-# Küresel Şirket Ana Cüzdanı (Platform Komisyonunun %2 yattığı adres)
-PLATFORM_WALLET = "CQcf...TD4q" 
+PLATFORM_WALLET = "CQcf...TD4q"
 PLATFORM_FEE_PERCENTAGE = 0.02 # %2 Sabit Platform Komisyonu
 
 class RegisterRequest(BaseModel):
@@ -154,7 +153,6 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
         if data.amount <= 0:
             raise HTTPException(status_code=400, detail="Invalid payment amount.")
         
-        # Kurumsal Finansal Hesaplama (Split-Payment)
         platform_fee = data.amount * PLATFORM_FEE_PERCENTAGE
         merchant_net_payout = data.amount - platform_fee
 
