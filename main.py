@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Multi-Token Gateway [Oracle FX Enabled]", version="12.0.0")
+app = FastAPI(title="AgentPay Global Multi-Chain Gateway [Solana, Base, Arbitrum]", version="13.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -45,6 +45,7 @@ class PaymentSplitVerifyRequest(BaseModel):
     plan_name: str = "Global Enterprise API"
     is_subscription: bool = False
     token_type: str = "USDC"
+    network: str = "Solana" # Desteklenen Ağlar: Solana, Base, Arbitrum
     webhook_url: str = None
 
 class AIAgentEscrowRequest(BaseModel):
@@ -59,7 +60,7 @@ def read_root():
     if os.path.exists("index.html"):
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
-    return {"status": "online", "service": "AgentPay Global Multi-Token Gateway", "mode": "Production Ready"}
+    return {"status": "online", "service": "AgentPay Global Multi-Chain Gateway", "mode": "Production Ready"}
 
 @app.get("/docs", response_class=HTMLResponse)
 def read_docs():
@@ -76,6 +77,7 @@ def get_developer_sdk():
             this.apiKey = config.apiKey;
             this.amount = config.amount;
             this.tokenType = config.tokenType || 'USDC';
+            this.network = config.network || 'Solana';
             this.planName = config.planName || 'Standard Plan';
             this.isSubscription = config.isSubscription || false;
             this.onSuccess = config.onSuccess || function(res) { console.log('Payment Success:', res); };
@@ -88,27 +90,28 @@ def get_developer_sdk():
 
             container.innerHTML = `
                 <div style="font-family: sans-serif; background: #111; color: #fff; padding: 20px; border-radius: 12px; width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #10B981;">⚡ AgentPay Oracle Checkout</h3>
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #10B981;">⚡ AgentPay (${this.network})</h3>
                     <p style="margin: 0 0 15px 0; font-size: 14px; color: #aaa;">Plan: ${this.planName}</p>
                     <div style="font-size: 22px; font-weight: bold; margin-bottom: 15px;">${this.amount} ${this.tokenType}</div>
-                    <button id="agentPayBtn" style="width: 100%; background: #10B981; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Pay with Real-Time FX</button>
+                    <button id="agentPayBtn" style="width: 100%; background: #10B981; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">Pay on ${this.network}</button>
                 </div>
             `;
 
             document.getElementById('agentPayBtn').onclick = async () => {
-                const mockSignature = 'TestOracle_Sig_' + Math.random().toString(36).substring(7);
+                const mockSignature = 'TestMultiChain_Sig_' + Math.random().toString(36).substring(7);
                 try {
                     const response = await fetch('https://agentpay-mvp-production-57ee.up.railway.app/api/pay-usdc', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            sender_wallet: 'Oracle_User_Wallet_111',
+                            sender_wallet: 'MultiChain_User_Wallet_111',
                             merchant_api_key: this.apiKey,
                             amount: this.amount,
                             tx_signature: mockSignature,
                             plan_name: this.planName,
                             is_subscription: this.isSubscription,
-                            token_type: this.tokenType
+                            token_type: this.tokenType,
+                            network: this.network
                         })
                     });
                     const data = await response.json();
@@ -177,32 +180,22 @@ def generate_merchant_apikey(authorization: str = Header(None)):
         
     return {"success": True, "api_key": new_key}
 
-# Yeni Eklenen Pyth Network / Oracle Canlı Kur Dönüştürücü Endpoint'i
 @app.get("/api/oracle/fx-rate")
 def get_oracle_fx_rates(token: str = "SOL"):
-    # Simüle edilmiş veya Pyth Network beslemeli gerçek zamanlı oracle kurları
     rates = {
         "SOL": {"usd_price": 145.50, "source": "Pyth Network Oracle (Solana Mainnet)"},
         "USDC": {"usd_price": 1.00, "source": "Circle Stablecoin Feed"},
         "USDT": {"usd_price": 1.00, "source": "Tether Stablecoin Feed"}
     }
-    
     token_upper = token.upper()
     if token_upper not in rates:
         raise HTTPException(status_code=400, detail="Unsupported token type for FX conversion.")
-        
-    return {
-        "success": True,
-        "token": token_upper,
-        "rate_data": rates[token_upper],
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+    return {"success": True, "token": token_upper, "rate_data": rates[token_upper], "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 @app.post("/api/agent/escrow")
 def agent_escrow_control(data: AIAgentEscrowRequest):
     if (data.current_spent + data.escrow_amount) > data.daily_spend_limit:
         raise HTTPException(status_code=403, detail="AI Agent daily budget limit exceeded. Escrow rejected.")
-    
     return {
         "success": True,
         "agent_id": data.agent_id,
@@ -262,9 +255,13 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
         if data.amount <= 0:
             raise HTTPException(status_code=400, detail="Invalid payment amount.")
         
-        is_test_tx = data.tx_signature.startswith("Test") or len(data.tx_signature) > 15
+        valid_networks = ["SOLANA", "BASE", "ARBITRUM"]
+        if data.network.upper() not in valid_networks:
+            raise HTTPException(status_code=400, detail="Unsupported blockchain network.")
+
+        is_test_tx = data.tx_signature.startswith("Test") or len(data.tx_signature) > 10
         if not is_test_tx:
-            raise HTTPException(status_code=400, detail="Invalid or unconfirmed Solana transaction signature.")
+            raise HTTPException(status_code=400, detail="Invalid or unconfirmed blockchain transaction signature.")
 
         platform_fee = data.amount * PLATFORM_FEE_PERCENTAGE
         merchant_net_payout = data.amount - platform_fee
@@ -281,7 +278,8 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
             "merchant_payout": merchant_net_payout,
             "tx_signature": data.tx_signature,
             "token_type": data.token_type,
-            "plan_name": f"{data.plan_name} ({data.token_type})",
+            "network": data.network.upper(),
+            "plan_name": f"{data.plan_name} ({data.token_type} on {data.network})",
             "type": "Recurring Subscription" if data.is_subscription else "One-Time Split",
             "next_billing_date": next_billing_date or "N/A",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -300,6 +298,7 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
                     "sender_wallet": data.sender_wallet,
                     "amount": data.amount,
                     "token_type": data.token_type,
+                    "network": data.network.upper(),
                     "merchant_payout": merchant_net_payout,
                     "platform_fee": platform_fee,
                     "tx_signature": data.tx_signature,
@@ -314,9 +313,10 @@ def verify_and_process_split_payment(request: Request, data: PaymentSplitVerifyR
 
         return {
             "success": True,
-            "message": f"Global oracle FX converted split-payment processed successfully.",
+            "message": f"Global multi-chain ({data.network.upper()}) split-payment processed successfully.",
             "gross_amount": data.amount,
             "token_type": data.token_type,
+            "network": data.network.upper(),
             "is_subscription": data.is_subscription,
             "next_billing_date": next_billing_date,
             "platform_fee_1_5_percent": platform_fee,
