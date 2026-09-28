@@ -5,10 +5,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import os
+import httpx
 from datetime import datetime
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay MVP", version="1.3.0")
+app = FastAPI(title="AgentPay MVP", version="1.4.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -19,6 +20,7 @@ ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "gizlisifre123"
 
 PAYMENT_DATABASE = []
+WEBHOOK_SETTINGS = {"url": ""}  # Kayıtlı webhook URL'si
 
 class PaymentRequest(BaseModel):
     sender_wallet: str
@@ -29,6 +31,9 @@ class PaymentRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class WebhookRequest(BaseModel):
+    url: str
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -42,6 +47,19 @@ def admin_login(data: LoginRequest):
     if data.username == ADMIN_USERNAME and data.password == ADMIN_PASSWORD:
         return {"success": True, "token": "agentpay_secure_admin_token_2026"}
     raise HTTPException(status_code=401, detail="Geçersiz kullanıcı adı veya şifre.")
+
+@app.post("/api/admin/webhook")
+def save_webhook(data: WebhookRequest, authorization: str = Header(None)):
+    if not authorization or authorization != "agentpay_secure_admin_token_2026":
+        raise HTTPException(status_code=403, detail="Unauthorized access.")
+    WEBHOOK_SETTINGS["url"] = data.url
+    return {"success": True, "message": "Webhook URL başarıyla güncellendi."}
+
+@app.get("/api/admin/webhook")
+def get_webhook(authorization: str = Header(None)):
+    if not authorization or authorization != "agentpay_secure_admin_token_2026":
+        raise HTTPException(status_code=403, detail="Unauthorized access.")
+    return {"success": True, "url": WEBHOOK_SETTINGS["url"]}
 
 @app.post("/api/pay-usdc")
 @limiter.limit("5/minute")
@@ -59,9 +77,17 @@ def create_usdc_payment(request: Request, data: PaymentRequest):
         }
         PAYMENT_DATABASE.append(payment_record)
 
+        # Webhook tanımlıysa hedef adrese arka planda otomatik bildirim gönder
+        if WEBHOOK_SETTINGS["url"]:
+            try:
+                with httpx.Client(timeout=5.0) as client:
+                    client.post(WEBHOOK_SETTINGS["url"], json=payment_record)
+            except Exception as wh_err:
+                print(f"Webhook tetikleme hatası: {wh_err}")
+
         return {
             "success": True,
-            "message": "Payment verified and recorded.",
+            "message": "Payment verified, recorded and webhook triggered.",
             "token": "USDC",
             "amount": data.amount,
             "tx_signature": data.tx_signature
@@ -81,5 +107,6 @@ def get_admin_stats(authorization: str = Header(None)):
         "success": True,
         "total_revenue": total_revenue,
         "total_transactions": total_transactions,
+        "webhook_url": WEBHOOK_SETTINGS["url"],
         "payments": PAYMENT_DATABASE[::-1]
     }

@@ -37,6 +37,9 @@
         .stat-card { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
 
+        /* Webhook Box */
+        .webhook-box { background: var(--card-bg); border: 1px solid #334155; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+
         #dashboardSection { display: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
@@ -106,7 +109,7 @@
                 <div id="loginError" style="color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center;"></div>
             </div>
 
-            <!-- Protected Data & Stats -->
+            <!-- Protected Data, Stats & Webhook -->
             <div id="adminContent" style="display: none;">
                 <!-- Analytics Cards -->
                 <div class="stats-grid">
@@ -118,6 +121,17 @@
                         <div style="color: var(--muted); font-size: 14px;">Total Transactions</div>
                         <div class="stat-value" id="totalTx">0</div>
                     </div>
+                </div>
+
+                <!-- Webhook Configuration Box -->
+                <div class="webhook-box">
+                    <h3 style="margin-top:0; color:#c084fc; font-size: 16px;">🔗 Webhook Notification URL</h3>
+                    <p style="color: var(--muted); font-size: 13px; margin-bottom: 10px;">When a payment is successfully completed, AgentPay will send a POST request to this endpoint automatically.</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="webhookInput" placeholder="https://your-saas-app.com/api/webhook" style="margin: 0; flex: 1;">
+                        <button onclick="saveWebhook()" style="width: auto; margin: 0; padding: 0 20px;">Save URL</button>
+                    </div>
+                    <div id="webhookStatus" style="font-size: 12px; color: var(--accent); margin-top: 5px;"></div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -217,6 +231,30 @@
             checkLoginStatus();
         }
 
+        async function saveWebhook() {
+            const token = localStorage.getItem("admin_token");
+            const url = document.getElementById("webhookInput").value;
+            const statusDiv = document.getElementById("webhookStatus");
+
+            try {
+                const res = await fetch("/api/admin/webhook", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": token 
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    statusDiv.innerText = "✓ Webhook URL saved successfully!";
+                    setTimeout(() => statusDiv.innerText = "", 3000);
+                }
+            } catch(e) {
+                alert("Failed to save webhook URL");
+            }
+        }
+
         async function connectWallet() {
             const provider = window.phantom?.solana;
             if (provider?.isPhantom) {
@@ -299,9 +337,11 @@
 
                 const data = await res.json();
                 
-                // İstatistik kartlarını güncelle
                 document.getElementById("totalRevenue").innerText = data.total_revenue + " USDC";
                 document.getElementById("totalTx").innerText = data.total_transactions;
+                if(data.webhook_url) {
+                    document.getElementById("webhookInput").value = data.webhook_url;
+                }
 
                 const tbody = document.getElementById("paymentTableBody");
                 tbody.innerHTML = "";
