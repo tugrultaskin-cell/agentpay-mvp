@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from supabase import create_client, Client
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AgentPay Global Enterprise Gateway [Off-Ramp & Multi-Chain]", version="14.0.0")
+app = FastAPI(title="AgentPay Global Enterprise Gateway [Visitor Analytics]", version="15.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -55,13 +55,12 @@ class AIAgentEscrowRequest(BaseModel):
     escrow_amount: float
     task_description: str
 
-# Yeni Eklenen Küresel Banka Off-Ramp Modeli (TRY Olmadan)
 class GlobalOffRampPayoutRequest(BaseModel):
     merchant_api_key: str
     amount_usd: float
     destination_iban_or_swift: str
     beneficiary_name: str
-    bank_country: str # Örn: US, DE, SG, GB
+    bank_country: str
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -136,19 +135,16 @@ def get_developer_sdk():
 def register_user(data: RegisterRequest):
     if not supabase:
         raise HTTPException(status_code=500, detail="Veritabanı bağlantısı kurulamadı.")
-    
     try:
         existing = supabase.table("merchants").select("*").eq("email", data.email).execute()
         if existing.data:
             raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayıtlı.")
-        
         new_merchant = {
             "email": data.email,
             "password": data.password,
             "payout_wallet": data.payout_wallet,
             "created_at": datetime.now().isoformat()
         }
-        
         supabase.table("merchants").insert(new_merchant).execute()
         return {"success": True, "message": "Merchant registered successfully in global network."}
     except Exception as e:
@@ -158,12 +154,10 @@ def register_user(data: RegisterRequest):
 def login_user(data: LoginRequest):
     if not supabase:
         raise HTTPException(status_code=500, detail="Veritabanı bağlantısı kurulamadı.")
-    
     try:
         res = supabase.table("merchants").select("*").eq("email", data.email).eq("password", data.password).execute()
         if not res.data:
             raise HTTPException(status_code=401, detail="Geçersiz e-posta veya şifre.")
-        
         token = f"global_live_token_{secrets.token_hex(12)}"
         return {"success": True, "token": token, "email": data.email, "payout_wallet": res.data[0]["payout_wallet"]}
     except Exception as e:
@@ -173,27 +167,35 @@ def login_user(data: LoginRequest):
 def generate_merchant_apikey(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=403, detail="Yetkilendirme gerekli.")
-    
     new_key = f"ag_live_{secrets.token_hex(20)}"
     key_record = {
         "api_key": new_key,
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-    
     if supabase:
         try:
             supabase.table("api_keys").insert(key_record).execute()
         except Exception:
             pass
-        
     return {"success": True, "api_key": new_key}
 
-# Küresel Banka Off-Ramp Çıkış Kapısı Endpoint'i
+# Ziyaretçi Kayıt ve İstatistik Endpoint'i
+@app.post("/api/analytics/track-visit")
+def track_visitor():
+    if supabase:
+        try:
+            visit_record = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            supabase.table("visitors").insert(visit_record).execute()
+        except Exception:
+            pass
+    return {"success": True}
+
 @app.post("/api/payout/off-ramp")
 def global_off_ramp_payout(data: GlobalOffRampPayoutRequest):
     if data.amount_usd <= 0:
         raise HTTPException(status_code=400, detail="Invalid payout amount.")
-        
     payout_id = f"payout_global_{secrets.token_hex(8)}"
     return {
         "success": True,
@@ -239,6 +241,7 @@ def get_merchant_dashboard(authorization: str = Header(None)):
     payments = []
     api_keys = []
     total_volume = 0.0
+    visitor_count = 0
     
     if supabase:
         try:
@@ -247,6 +250,10 @@ def get_merchant_dashboard(authorization: str = Header(None)):
             
             key_res = supabase.table("api_keys").select("*").execute()
             api_keys = key_res.data or []
+            
+            # Ziyaretçi istatistiklerini çekme
+            visit_res = supabase.table("visitors").select("*").execute()
+            visitor_count = len(visit_res.data or [])
             
             total_volume = sum(p["amount"] for p in payments)
         except Exception as e:
@@ -267,6 +274,7 @@ def get_merchant_dashboard(authorization: str = Header(None)):
         "total_volume": total_volume,
         "platform_earnings": platform_earnings,
         "total_transactions": len(payments),
+        "total_visitors": visitor_count, # Yeni eklenen ziyaretçi istatistiği
         "analytics": {
             "token_distribution": token_breakdown,
             "average_ticket_size": (total_volume / len(payments)) if payments else 0.0

@@ -8,7 +8,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Header / Navbar (Gizli yazı/buton içermez, tamamen profesyonel görünüm) -->
+    <!-- Header / Navbar -->
     <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -47,7 +47,7 @@
         </div>
         <div class="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold mb-6">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>v14.0 Enterprise Edition Live on Solana, Base & Arbitrum</span>
+            <span>v15.0 Enterprise Edition — Visitor Analytics Enabled</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight mb-6">
             The Autonomous Web3 Payment Gateway for <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">AI Agents & Global SaaS</span>.
@@ -91,7 +91,7 @@
         </div>
     </section>
 
-    <!-- Tamamen Gizli Yönetim Paneli (Normalde görünmez, sadece URL'deki #admin-hash ile veya oturum açıksa görünür) -->
+    <!-- Gizli Yönetim Paneli (Sadece #admin-login ile erişilir) -->
     <section id="admin-login" class="max-w-4xl mx-auto px-6 py-16 border-t border-slate-900">
         <div class="bg-slate-900/80 border border-slate-800 p-8 md:p-12 rounded-3xl shadow-2xl relative overflow-hidden">
             
@@ -115,28 +115,33 @@
                 </form>
             </div>
 
-            <!-- Gizli İstatistik Paneli (Başarılı Giriş Sonrası Açılır) -->
+            <!-- Gizli İstatistik & Ziyaretçi Paneli (Giriş Sonrası) -->
             <div id="dashboard-container" class="hidden space-y-6">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-emerald-400">📊 Owner Statistics & Analytics</h2>
-                        <p class="text-xs text-slate-400">Welcome back, Tugrul. End-to-end encrypted private feed.</p>
+                        <h2 class="text-2xl font-bold text-emerald-400">📊 Owner Statistics & Visitor Analytics</h2>
+                        <p class="text-xs text-slate-400">Welcome back, Tugrul. Encrypted private feed.</p>
                     </div>
                     <button id="logoutBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg font-semibold transition">Lock Dashboard</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
-                        <div class="text-xs font-medium text-slate-400 mb-1">Total Volume Processed</div>
-                        <div id="statVolume" class="text-3xl font-black text-emerald-400">$0.00</div>
+                        <div class="text-xs font-medium text-slate-400 mb-1">Total Volume</div>
+                        <div id="statVolume" class="text-2xl font-black text-emerald-400">$0.00</div>
                     </div>
                     <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
-                        <div class="text-xs font-medium text-slate-400 mb-1">Platform Earnings (1.5%)</div>
-                        <div id="statEarnings" class="text-3xl font-black text-teal-400">$0.00</div>
+                        <div class="text-xs font-medium text-slate-400 mb-1">Platform Earnings</div>
+                        <div id="statEarnings" class="text-2xl font-black text-teal-400">$0.00</div>
                     </div>
                     <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
                         <div class="text-xs font-medium text-slate-400 mb-1">Total Transactions</div>
-                        <div id="statTxCount" class="text-3xl font-black text-cyan-400">0</div>
+                        <div id="statTxCount" class="text-2xl font-black text-cyan-400">0</div>
+                    </div>
+                    <!-- Ziyaretçi Sayısı Kutusu -->
+                    <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl">
+                        <div class="text-xs font-medium text-slate-400 mb-1">Total Visitors 👁️</div>
+                        <div id="statVisitors" class="text-2xl font-black text-amber-400">0</div>
                     </div>
                 </div>
 
@@ -163,55 +168,21 @@
         </div>
     </section>
 
-    <!-- Interactive SDK & Multi-Chain Preview Section -->
-    <section id="sdk" class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-900">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-                <span class="text-emerald-400 text-xs font-bold uppercase tracking-widest">Developer First</span>
-                <h2 class="text-3xl font-bold mt-2 mb-4">Multi-Chain Checkout Widget</h2>
-                <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                    Embed our secure checkout widget with network selection (Solana, Base, Arbitrum) using a single line of JavaScript code.
-                </p>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl font-mono text-xs text-emerald-300 overflow-x-auto mb-6">
-                    &lt;script src="https://agentpay-mvp-production-57ee.up.railway.app/sdk.js"&gt;&lt;/script&gt;<br>
-                    &lt;div id="checkout"&gt;&lt;/div&gt;<br>
-                    &lt;script&gt;<br>
-                    &nbsp;&nbsp;const widget = new AgentPayWidget({ apiKey: 'ag_live_xxx', amount: 100, network: 'Solana' });<br>
-                    &nbsp;&nbsp;widget.render('checkout');<br>
-                    &lt;/script&gt;
-                </div>
-            </div>
-            <div class="bg-slate-900/60 border border-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center">
-                <div class="text-sm font-semibold text-slate-400 mb-4">Interactive Widget Preview:</div>
-                <div id="agentpay-demo-container"></div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-500">
         <p>&copy; 2026 AgentPay Global Network. All rights reserved. Powered by Solana, Base, Arbitrum & Supabase.</p>
     </footer>
 
-    <!-- Secret Admin & Widget Script Execution -->
+    <!-- Secret Admin & Ziyaretçi Sayaç Script'i -->
     <script src="/sdk.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            // Widget Demo
-            if (window.AgentPayWidget) {
-                const demoWidget = new AgentPayWidget({
-                    apiKey: 'ag_live_demo_key999',
-                    amount: 150.0,
-                    tokenType: 'USDC',
-                    network: 'Solana',
-                    planName: 'AI Agent Enterprise Suite',
-                    onSuccess: (res) => alert('Multi-Chain Payment Success! Tx: ' + res.tx_signature),
-                    onError: (err) => alert('Payment Error occurred')
-                });
-                demoWidget.render('agentpay-demo-container');
+            // Ziyaretçi Sayacını Tetikle (Her oturumda 1 kez kaydeder)
+            if (!sessionStorage.getItem('visited_tracked')) {
+                fetch('/api/analytics/track-visit', { method: 'POST' }).catch(() => {});
+                sessionStorage.setItem('visited_tracked', 'true');
             }
 
-            // Secret Admin Login Handler & Auto-Hide
             const loginForm = document.getElementById('secretLoginForm');
             const loginContainer = document.getElementById('login-container');
             const dashContainer = document.getElementById('dashboard-container');
@@ -219,7 +190,6 @@
             const loginError = document.getElementById('loginError');
             const logoutBtn = document.getElementById('logoutBtn');
 
-            // Eğer hash #admin-login değilse ve oturum açık değilse gizli bölümü tamamen görünmez yap
             function checkVisibility() {
                 const isAuthed = localStorage.getItem('agentpay_owner_auth') === 'true';
                 const isHashMatch = window.location.hash === '#admin-login';
@@ -234,7 +204,6 @@
             window.addEventListener('hashchange', checkVisibility);
             checkVisibility();
 
-            // Oturum kontrolü (Local storage)
             if (localStorage.getItem('agentpay_owner_auth') === 'true') {
                 loginContainer.classList.add('hidden');
                 dashContainer.classList.remove('hidden');
@@ -277,6 +246,7 @@
                         document.getElementById('statVolume').innerText = '$' + data.total_volume.toLocaleString();
                         document.getElementById('statEarnings').innerText = '$' + data.platform_earnings.toLocaleString();
                         document.getElementById('statTxCount').innerText = data.total_transactions;
+                        document.getElementById('statVisitors').innerText = data.total_visitors || 0; // Ziyaretçi sayısı
 
                         const tbody = document.getElementById('paymentsTableBody');
                         if (data.payments && data.payments.length > 0) {
